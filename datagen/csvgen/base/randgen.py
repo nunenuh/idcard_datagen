@@ -3,7 +3,9 @@ import random
 import pandas as pd
 from datetime import datetime
 
-from .. import config
+from . import config
+
+
 
 def random_choice(data, weight, k=1):
     choice = random.choices(data, weights=weight,k=k)
@@ -16,16 +18,18 @@ def birth_date(age_range=[17,63], date_format="%d-%m-%Y"):
     ryear = curr_year - curr_age
     
     rmonth = random.randint(1,12)
-    if rmonth % 2 == 0:
+    if rmonth % 2 == 0 and rmonth != 2:
         rday = random.randint(1,30)
-    elif rmonth % 2 == 1:
+    elif rmonth % 2 == 0 and rmonth==2:
+        rday = random.randint(1,27)
+    else: # still not working
         rday = random.randint(1,31)
-    elif rmonth==2:
-        rday = random.randint(1,28)
-    else:
-        rday = random.randint(1,28)
-    
-    bdt = datetime(ryear, rmonth, rday)
+        
+    try:
+        bdt = datetime(ryear, rmonth, rday)
+    except:
+        bdt = datetime(ryear, rmonth, 27)
+        
     date_str = bdt.strftime(date_format)
     date_comp_str = bdt.strftime('%d-%m-%y').split('-')
     
@@ -38,6 +42,7 @@ def birth_place(places:list):
             place = place.replace('KOTA ','')
         if place.startswith('KABUPATEN'):
             place = place.replace('KABUPATEN ','')
+        
         
         tplaces.append(place)
     places = tplaces
@@ -57,7 +62,23 @@ def blood_type(csv_path=None):
     choice = random_choice(data, weight)
     return choice
     
+def name(csv_path = None):
+    if csv_path == None:
+            csv_path = config.csv_nama
+    dframe = pd.read_csv(csv_path)
+    sample = dframe.sample().reset_index(drop=True)
+    sample = sample['nama'][0]
+    return sample
 
+
+def address(csv_path = None):
+    if csv_path == None:
+            csv_path = config.csv_address
+    dframe = pd.read_csv(csv_path)
+    sample = dframe.sample().reset_index(drop=True)
+    sample = sample['alamat'][0].strip()
+    return sample
+    
 
 def sign_date(year_ago=10, date_format="%d-%m-%Y"):
     curr_year_ago = random.randint(0, year_ago)
@@ -65,18 +86,25 @@ def sign_date(year_ago=10, date_format="%d-%m-%Y"):
     ryear = curr_year - curr_year_ago
     
     rmonth = random.randint(1,12)
-    if rmonth % 2 == 0:
+    if rmonth % 2 == 0 and rmonth != 2:
         rday = random.randint(1,30)
-    elif rmonth % 2 == 1:
+    elif rmonth % 2 == 0 and rmonth==2:
+        rday = random.randint(1,27)
+    else: # still not working
         rday = random.randint(1,31)
-    elif rmonth==2:
-        rday = random.randint(1,28)
-    else:
-        rday = random.randint(1,28)
     
-    bdt = datetime(ryear, rmonth, rday)
+    try:
+        bdt = datetime(ryear, rmonth, rday)
+    except:
+        bdt = datetime(ryear, rmonth, 27)
     date_str = bdt.strftime(date_format)
     return date_str
+
+def sign_place(text):
+    if "KABUPATEN" in text:
+        text = text.split("KABUPATEN ")[-1]
+    
+    return text
 
 
 def gender(data=None, weight=None):
@@ -136,6 +164,8 @@ def clean_kab_text(text):
         text = text.replace('KOTA ADM. ','KOTA')
     if text.startswith("KAB."):
         text = text.replace('KAB. ','KABUPATEN ')
+    if text.startswith("KAB"):
+        text = text.replace('KAB ','KABUPATEN ')
     return text
 
 
@@ -158,10 +188,13 @@ def wilayah(kode_wilayah=None, csv_path=None):
 
     nama_kab = clean_kab_text(nama_kab)
 
-    dout = [
-        (kode_prov, nama_prov),(kode_kab, nama_kab),
-        (kode_kec, nama_kec),(kode_kel, nama_kel)
-    ]
+    dout = {
+        'prov':{'kode':kode_prov, 'nama': nama_prov},
+        'kab': {'kode': kode_kab, 'nama': nama_kab},
+        'kec': {'kode': kode_kec, 'nama': nama_kec},
+        'kel': {'kode': kode_kel, 'nama': nama_kel},
+    }
+
     
     return dout
 
