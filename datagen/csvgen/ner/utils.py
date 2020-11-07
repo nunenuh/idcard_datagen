@@ -37,11 +37,6 @@ def bilou_prefixer(text_list, label=None):
                 out.append(bl)
     return out
 
-# bilou_prefixer(["PROVINSI", "NUSA", "TENGGARA", "BARAT"], label="VAL_PROV")
-
-
-
-
 def cointoss(true_prob=0.5):
     data = [True, False]
     weights = [true_prob, 1-true_prob]
