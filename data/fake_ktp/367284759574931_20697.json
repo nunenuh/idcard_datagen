@@ -1,0 +1,1477 @@
+{
+    "image_filename": "367284759574931_20697.png",
+    "json_filename": "367284759574931_20697.json",
+    "size": [
+        1011,
+        638
+    ],
+    "points": [
+        [
+            0,
+            0
+        ],
+        [
+            1011,
+            0
+        ],
+        [
+            1011,
+            638
+        ],
+        [
+            0,
+            638
+        ]
+    ],
+    "objects": [
+        {
+            "text": "PROVINSI",
+            "points": [
+                [
+                    333.0,
+                    30.0
+                ],
+                [
+                    476.0,
+                    30.0
+                ],
+                [
+                    476.0,
+                    58.0
+                ],
+                [
+                    333.0,
+                    58.0
+                ]
+            ],
+            "classname": "provinsi",
+            "subclass": "value"
+        },
+        {
+            "text": "DKI",
+            "points": [
+                [
+                    484.0,
+                    30.0
+                ],
+                [
+                    534.0,
+                    30.0
+                ],
+                [
+                    534.0,
+                    58.0
+                ],
+                [
+                    484.0,
+                    58.0
+                ]
+            ],
+            "classname": "provinsi",
+            "subclass": "value"
+        },
+        {
+            "text": "JAKARTA",
+            "points": [
+                [
+                    542.0,
+                    30.0
+                ],
+                [
+                    678.0,
+                    30.0
+                ],
+                [
+                    678.0,
+                    58.0
+                ],
+                [
+                    542.0,
+                    58.0
+                ]
+            ],
+            "classname": "provinsi",
+            "subclass": "value"
+        },
+        {
+            "text": "JAKARTA",
+            "points": [
+                [
+                    384.0,
+                    60.0
+                ],
+                [
+                    520.0,
+                    60.0
+                ],
+                [
+                    520.0,
+                    88.0
+                ],
+                [
+                    384.0,
+                    88.0
+                ]
+            ],
+            "classname": "kabkota",
+            "subclass": "value"
+        },
+        {
+            "text": "BARAT",
+            "points": [
+                [
+                    528.0,
+                    60.0
+                ],
+                [
+                    628.0,
+                    60.0
+                ],
+                [
+                    628.0,
+                    88.0
+                ],
+                [
+                    528.0,
+                    88.0
+                ]
+            ],
+            "classname": "kabkota",
+            "subclass": "value"
+        },
+        {
+            "text": "NIK",
+            "points": [
+                [
+                    30,
+                    100
+                ],
+                [
+                    105,
+                    100
+                ],
+                [
+                    105,
+                    137
+                ],
+                [
+                    30,
+                    137
+                ]
+            ],
+            "classname": "nik",
+            "subclass": "field"
+        },
+        {
+            "text": ":",
+            "points": [
+                [
+                    220,
+                    100
+                ],
+                [
+                    245,
+                    100
+                ],
+                [
+                    245,
+                    137
+                ],
+                [
+                    220,
+                    137
+                ]
+            ],
+            "classname": "nik",
+            "subclass": "delimiter"
+        },
+        {
+            "text": "367284759574931",
+            "points": [
+                [
+                    260,
+                    100
+                ],
+                [
+                    635,
+                    100
+                ],
+                [
+                    635,
+                    137
+                ],
+                [
+                    260,
+                    137
+                ]
+            ],
+            "classname": "nik",
+            "subclass": "value"
+        },
+        {
+            "text": "Nama",
+            "points": [
+                [
+                    30,
+                    160
+                ],
+                [
+                    92,
+                    160
+                ],
+                [
+                    92,
+                    181
+                ],
+                [
+                    30,
+                    181
+                ]
+            ],
+            "classname": "nama",
+            "subclass": "field"
+        },
+        {
+            "text": ":",
+            "points": [
+                [
+                    260,
+                    160
+                ],
+                [
+                    266,
+                    160
+                ],
+                [
+                    266,
+                    181
+                ],
+                [
+                    260,
+                    181
+                ]
+            ],
+            "classname": "nama",
+            "subclass": "delimiter"
+        },
+        {
+            "text": "YOUNG",
+            "points": [
+                [
+                    275,
+                    160
+                ],
+                [
+                    360,
+                    160
+                ],
+                [
+                    360,
+                    181
+                ],
+                [
+                    275,
+                    181
+                ]
+            ],
+            "classname": "nama",
+            "subclass": "value"
+        },
+        {
+            "text": "HOWA",
+            "points": [
+                [
+                    366,
+                    160
+                ],
+                [
+                    439,
+                    160
+                ],
+                [
+                    439,
+                    181
+                ],
+                [
+                    366,
+                    181
+                ]
+            ],
+            "classname": "nama",
+            "subclass": "value"
+        },
+        {
+            "text": "Tempat/Tgl",
+            "points": [
+                [
+                    30,
+                    190
+                ],
+                [
+                    146,
+                    190
+                ],
+                [
+                    146,
+                    216
+                ],
+                [
+                    30,
+                    216
+                ]
+            ],
+            "classname": "ttl",
+            "subclass": "field"
+        },
+        {
+            "text": "Lahir",
+            "points": [
+                [
+                    152,
+                    190
+                ],
+                [
+                    204,
+                    190
+                ],
+                [
+                    204,
+                    211
+                ],
+                [
+                    152,
+                    211
+                ]
+            ],
+            "classname": "ttl",
+            "subclass": "field"
+        },
+        {
+            "text": ":",
+            "points": [
+                [
+                    260,
+                    190
+                ],
+                [
+                    266,
+                    190
+                ],
+                [
+                    266,
+                    211
+                ],
+                [
+                    260,
+                    211
+                ]
+            ],
+            "classname": "ttl",
+            "subclass": "delimiter"
+        },
+        {
+            "text": "CINA,",
+            "points": [
+                [
+                    275,
+                    190
+                ],
+                [
+                    336,
+                    190
+                ],
+                [
+                    336,
+                    214
+                ],
+                [
+                    275,
+                    214
+                ]
+            ],
+            "classname": "ttl",
+            "subclass": "value"
+        },
+        {
+            "text": "01-09-1967",
+            "points": [
+                [
+                    342,
+                    190
+                ],
+                [
+                    462,
+                    190
+                ],
+                [
+                    462,
+                    211
+                ],
+                [
+                    342,
+                    211
+                ]
+            ],
+            "classname": "ttl",
+            "subclass": "value"
+        },
+        {
+            "text": "Jenis",
+            "points": [
+                [
+                    30,
+                    220
+                ],
+                [
+                    85,
+                    220
+                ],
+                [
+                    85,
+                    241
+                ],
+                [
+                    30,
+                    241
+                ]
+            ],
+            "classname": "gender",
+            "subclass": "field"
+        },
+        {
+            "text": "Kelamin",
+            "points": [
+                [
+                    91,
+                    220
+                ],
+                [
+                    174,
+                    220
+                ],
+                [
+                    174,
+                    241
+                ],
+                [
+                    91,
+                    241
+                ]
+            ],
+            "classname": "gender",
+            "subclass": "field"
+        },
+        {
+            "text": ":",
+            "points": [
+                [
+                    260,
+                    220
+                ],
+                [
+                    266,
+                    220
+                ],
+                [
+                    266,
+                    241
+                ],
+                [
+                    260,
+                    241
+                ]
+            ],
+            "classname": "gender",
+            "subclass": "delimiter"
+        },
+        {
+            "text": "LAKI-LAKI",
+            "points": [
+                [
+                    275,
+                    220
+                ],
+                [
+                    381,
+                    220
+                ],
+                [
+                    381,
+                    241
+                ],
+                [
+                    275,
+                    241
+                ]
+            ],
+            "classname": "gender",
+            "subclass": "value"
+        },
+        {
+            "text": "Gol.",
+            "points": [
+                [
+                    520,
+                    220
+                ],
+                [
+                    562,
+                    220
+                ],
+                [
+                    562,
+                    241
+                ],
+                [
+                    520,
+                    241
+                ]
+            ],
+            "classname": "goldar",
+            "subclass": "field"
+        },
+        {
+            "text": "Darah",
+            "points": [
+                [
+                    568,
+                    220
+                ],
+                [
+                    632,
+                    220
+                ],
+                [
+                    632,
+                    241
+                ],
+                [
+                    568,
+                    241
+                ]
+            ],
+            "classname": "goldar",
+            "subclass": "field"
+        },
+        {
+            "text": ":",
+            "points": [
+                [
+                    635,
+                    220
+                ],
+                [
+                    641,
+                    220
+                ],
+                [
+                    641,
+                    241
+                ],
+                [
+                    635,
+                    241
+                ]
+            ],
+            "classname": "goldar",
+            "subclass": "delimiter"
+        },
+        {
+            "text": "B",
+            "points": [
+                [
+                    640,
+                    220
+                ],
+                [
+                    655,
+                    220
+                ],
+                [
+                    655,
+                    241
+                ],
+                [
+                    640,
+                    241
+                ]
+            ],
+            "classname": "goldar",
+            "subclass": "value"
+        },
+        {
+            "text": "Alamat",
+            "points": [
+                [
+                    30,
+                    250
+                ],
+                [
+                    103,
+                    250
+                ],
+                [
+                    103,
+                    271
+                ],
+                [
+                    30,
+                    271
+                ]
+            ],
+            "classname": "alamat",
+            "subclass": "field"
+        },
+        {
+            "text": ":",
+            "points": [
+                [
+                    260,
+                    250
+                ],
+                [
+                    266,
+                    250
+                ],
+                [
+                    266,
+                    271
+                ],
+                [
+                    260,
+                    271
+                ]
+            ],
+            "classname": "alamat",
+            "subclass": "delimiter"
+        },
+        {
+            "text": "JL",
+            "points": [
+                [
+                    275,
+                    250
+                ],
+                [
+                    300,
+                    250
+                ],
+                [
+                    300,
+                    271
+                ],
+                [
+                    275,
+                    271
+                ]
+            ],
+            "classname": "alamat",
+            "subclass": "value"
+        },
+        {
+            "text": "TANETI",
+            "points": [
+                [
+                    306,
+                    250
+                ],
+                [
+                    387,
+                    250
+                ],
+                [
+                    387,
+                    271
+                ],
+                [
+                    306,
+                    271
+                ]
+            ],
+            "classname": "alamat",
+            "subclass": "value"
+        },
+        {
+            "text": "DLM",
+            "points": [
+                [
+                    393,
+                    250
+                ],
+                [
+                    442,
+                    250
+                ],
+                [
+                    442,
+                    271
+                ],
+                [
+                    393,
+                    271
+                ]
+            ],
+            "classname": "alamat",
+            "subclass": "value"
+        },
+        {
+            "text": "NO",
+            "points": [
+                [
+                    448,
+                    250
+                ],
+                [
+                    483,
+                    250
+                ],
+                [
+                    483,
+                    271
+                ],
+                [
+                    448,
+                    271
+                ]
+            ],
+            "classname": "alamat",
+            "subclass": "value"
+        },
+        {
+            "text": "09",
+            "points": [
+                [
+                    489,
+                    250
+                ],
+                [
+                    515,
+                    250
+                ],
+                [
+                    515,
+                    271
+                ],
+                [
+                    489,
+                    271
+                ]
+            ],
+            "classname": "alamat",
+            "subclass": "value"
+        },
+        {
+            "text": "F",
+            "points": [
+                [
+                    521,
+                    250
+                ],
+                [
+                    535,
+                    250
+                ],
+                [
+                    535,
+                    271
+                ],
+                [
+                    521,
+                    271
+                ]
+            ],
+            "classname": "alamat",
+            "subclass": "value"
+        },
+        {
+            "text": "RT/RW",
+            "points": [
+                [
+                    70,
+                    280
+                ],
+                [
+                    146,
+                    280
+                ],
+                [
+                    146,
+                    301
+                ],
+                [
+                    70,
+                    301
+                ]
+            ],
+            "classname": "rtrw",
+            "subclass": "field"
+        },
+        {
+            "text": ":",
+            "points": [
+                [
+                    260,
+                    280
+                ],
+                [
+                    266,
+                    280
+                ],
+                [
+                    266,
+                    301
+                ],
+                [
+                    260,
+                    301
+                ]
+            ],
+            "classname": "rtrw",
+            "subclass": "delimiter"
+        },
+        {
+            "text": "002/007",
+            "points": [
+                [
+                    275,
+                    280
+                ],
+                [
+                    359,
+                    280
+                ],
+                [
+                    359,
+                    301
+                ],
+                [
+                    275,
+                    301
+                ]
+            ],
+            "classname": "rtrw",
+            "subclass": "value"
+        },
+        {
+            "text": "Kel/Desa",
+            "points": [
+                [
+                    70,
+                    310
+                ],
+                [
+                    164,
+                    310
+                ],
+                [
+                    164,
+                    331
+                ],
+                [
+                    70,
+                    331
+                ]
+            ],
+            "classname": "keldesa",
+            "subclass": "field"
+        },
+        {
+            "text": ":",
+            "points": [
+                [
+                    260,
+                    310
+                ],
+                [
+                    266,
+                    310
+                ],
+                [
+                    266,
+                    331
+                ],
+                [
+                    260,
+                    331
+                ]
+            ],
+            "classname": "keldesa",
+            "subclass": "delimiter"
+        },
+        {
+            "text": "CIDENG",
+            "points": [
+                [
+                    275,
+                    310
+                ],
+                [
+                    365,
+                    310
+                ],
+                [
+                    365,
+                    331
+                ],
+                [
+                    275,
+                    331
+                ]
+            ],
+            "classname": "keldesa",
+            "subclass": "value"
+        },
+        {
+            "text": "Kecamatan",
+            "points": [
+                [
+                    70,
+                    340
+                ],
+                [
+                    187,
+                    340
+                ],
+                [
+                    187,
+                    361
+                ],
+                [
+                    70,
+                    361
+                ]
+            ],
+            "classname": "kecamatan",
+            "subclass": "field"
+        },
+        {
+            "text": ":",
+            "points": [
+                [
+                    260,
+                    340
+                ],
+                [
+                    266,
+                    340
+                ],
+                [
+                    266,
+                    361
+                ],
+                [
+                    260,
+                    361
+                ]
+            ],
+            "classname": "kecamatan",
+            "subclass": "delimiter"
+        },
+        {
+            "text": "GAMBIR",
+            "points": [
+                [
+                    275,
+                    340
+                ],
+                [
+                    365,
+                    340
+                ],
+                [
+                    365,
+                    361
+                ],
+                [
+                    275,
+                    361
+                ]
+            ],
+            "classname": "kecamatan",
+            "subclass": "value"
+        },
+        {
+            "text": "Agama",
+            "points": [
+                [
+                    30,
+                    370
+                ],
+                [
+                    104,
+                    370
+                ],
+                [
+                    104,
+                    396
+                ],
+                [
+                    30,
+                    396
+                ]
+            ],
+            "classname": "agama",
+            "subclass": "field"
+        },
+        {
+            "text": ":",
+            "points": [
+                [
+                    260,
+                    370
+                ],
+                [
+                    266,
+                    370
+                ],
+                [
+                    266,
+                    391
+                ],
+                [
+                    260,
+                    391
+                ]
+            ],
+            "classname": "agama",
+            "subclass": "delimiter"
+        },
+        {
+            "text": "BUDHA",
+            "points": [
+                [
+                    275,
+                    370
+                ],
+                [
+                    357,
+                    370
+                ],
+                [
+                    357,
+                    391
+                ],
+                [
+                    275,
+                    391
+                ]
+            ],
+            "classname": "agama",
+            "subclass": "value"
+        },
+        {
+            "text": "Status",
+            "points": [
+                [
+                    30,
+                    400
+                ],
+                [
+                    95,
+                    400
+                ],
+                [
+                    95,
+                    421
+                ],
+                [
+                    30,
+                    421
+                ]
+            ],
+            "classname": "status",
+            "subclass": "field"
+        },
+        {
+            "text": "Perkawinan",
+            "points": [
+                [
+                    101,
+                    400
+                ],
+                [
+                    223,
+                    400
+                ],
+                [
+                    223,
+                    421
+                ],
+                [
+                    101,
+                    421
+                ]
+            ],
+            "classname": "status",
+            "subclass": "field"
+        },
+        {
+            "text": ":",
+            "points": [
+                [
+                    260,
+                    400
+                ],
+                [
+                    266,
+                    400
+                ],
+                [
+                    266,
+                    421
+                ],
+                [
+                    260,
+                    421
+                ]
+            ],
+            "classname": "status",
+            "subclass": "delimiter"
+        },
+        {
+            "text": "KAWIN",
+            "points": [
+                [
+                    275,
+                    400
+                ],
+                [
+                    350,
+                    400
+                ],
+                [
+                    350,
+                    421
+                ],
+                [
+                    275,
+                    421
+                ]
+            ],
+            "classname": "status",
+            "subclass": "value"
+        },
+        {
+            "text": "Pekerjaan",
+            "points": [
+                [
+                    30,
+                    430
+                ],
+                [
+                    135,
+                    430
+                ],
+                [
+                    135,
+                    456
+                ],
+                [
+                    30,
+                    456
+                ]
+            ],
+            "classname": "pekerjaan",
+            "subclass": "field"
+        },
+        {
+            "text": ":",
+            "points": [
+                [
+                    260,
+                    430
+                ],
+                [
+                    266,
+                    430
+                ],
+                [
+                    266,
+                    451
+                ],
+                [
+                    260,
+                    451
+                ]
+            ],
+            "classname": "pekerjaan",
+            "subclass": "delimiter"
+        },
+        {
+            "text": "WIRASWASTA",
+            "points": [
+                [
+                    275,
+                    430
+                ],
+                [
+                    432,
+                    430
+                ],
+                [
+                    432,
+                    451
+                ],
+                [
+                    275,
+                    451
+                ]
+            ],
+            "classname": "pekerjaan",
+            "subclass": "value"
+        },
+        {
+            "text": "Kewarganegaraan",
+            "points": [
+                [
+                    30,
+                    460
+                ],
+                [
+                    221,
+                    460
+                ],
+                [
+                    221,
+                    486
+                ],
+                [
+                    30,
+                    486
+                ]
+            ],
+            "classname": "warga",
+            "subclass": "field"
+        },
+        {
+            "text": ":",
+            "points": [
+                [
+                    260,
+                    460
+                ],
+                [
+                    266,
+                    460
+                ],
+                [
+                    266,
+                    481
+                ],
+                [
+                    260,
+                    481
+                ]
+            ],
+            "classname": "warga",
+            "subclass": "delimiter"
+        },
+        {
+            "text": "WNI",
+            "points": [
+                [
+                    275,
+                    460
+                ],
+                [
+                    320,
+                    460
+                ],
+                [
+                    320,
+                    481
+                ],
+                [
+                    275,
+                    481
+                ]
+            ],
+            "classname": "warga",
+            "subclass": "value"
+        },
+        {
+            "text": "Berlaku",
+            "points": [
+                [
+                    30,
+                    490
+                ],
+                [
+                    109,
+                    490
+                ],
+                [
+                    109,
+                    511
+                ],
+                [
+                    30,
+                    511
+                ]
+            ],
+            "classname": "berlaku",
+            "subclass": "field"
+        },
+        {
+            "text": "Hingga",
+            "points": [
+                [
+                    115,
+                    490
+                ],
+                [
+                    189,
+                    490
+                ],
+                [
+                    189,
+                    516
+                ],
+                [
+                    115,
+                    516
+                ]
+            ],
+            "classname": "berlaku",
+            "subclass": "field"
+        },
+        {
+            "text": ":",
+            "points": [
+                [
+                    260,
+                    490
+                ],
+                [
+                    266,
+                    490
+                ],
+                [
+                    266,
+                    511
+                ],
+                [
+                    260,
+                    511
+                ]
+            ],
+            "classname": "berlaku",
+            "subclass": "delimiter"
+        },
+        {
+            "text": "SEUMUR",
+            "points": [
+                [
+                    275,
+                    490
+                ],
+                [
+                    375,
+                    490
+                ],
+                [
+                    375,
+                    511
+                ],
+                [
+                    275,
+                    511
+                ]
+            ],
+            "classname": "berlaku",
+            "subclass": "value"
+        },
+        {
+            "text": "HIDUP",
+            "points": [
+                [
+                    381,
+                    490
+                ],
+                [
+                    453,
+                    490
+                ],
+                [
+                    453,
+                    511
+                ],
+                [
+                    381,
+                    511
+                ]
+            ],
+            "classname": "berlaku",
+            "subclass": "value"
+        },
+        {
+            "text": "JAKARTA",
+            "points": [
+                [
+                    758.5,
+                    410.0
+                ],
+                [
+                    846.5,
+                    410.0
+                ],
+                [
+                    846.5,
+                    428.0
+                ],
+                [
+                    758.5,
+                    428.0
+                ]
+            ],
+            "classname": "sign_kabkota",
+            "subclass": "value"
+        },
+        {
+            "text": "BARAT",
+            "points": [
+                [
+                    851.5,
+                    410.0
+                ],
+                [
+                    916.5,
+                    410.0
+                ],
+                [
+                    916.5,
+                    428.0
+                ],
+                [
+                    851.5,
+                    428.0
+                ]
+            ],
+            "classname": "sign_kabkota",
+            "subclass": "value"
+        },
+        {
+            "text": "24-07-2018",
+            "points": [
+                [
+                    787.5,
+                    440.0
+                ],
+                [
+                    887.5,
+                    440.0
+                ],
+                [
+                    887.5,
+                    458.0
+                ],
+                [
+                    787.5,
+                    458.0
+                ]
+            ],
+            "classname": "sign_tgl",
+            "subclass": "value"
+        }
+    ]
+}

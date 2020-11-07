@@ -1,0 +1,617 @@
+{
+  "size": [1011, 638],
+  "boxes": [[0, 0], [1011, 0], [1011, 638], [0, 638]],
+  "default_setting": {
+    "font_name": [
+      "arial",
+      "ocra"
+    ],
+    "font_size": {
+      "xlarge": 42,
+      "large": 30,
+      "medium": 23,
+      "small": 19
+    },
+    "line_height": 30,
+    "field": {
+      "position": {
+        "normal": 30,
+        "indent": 70,
+        "custom": 520
+      },
+      "is_capital": false
+    },
+    "value": {
+      "max_width": 450,
+      "is_capital": true
+    }
+  },
+  "classname": {
+    "provinsi": {
+      "adjust": "center",
+      "type": "text",
+      "font_size": 30,
+      "font_name": "arial",
+      "field": {
+        "is_used": false,
+        "text": null,
+        "is_capital": false,
+        "position": null
+      },
+      "delimiter": {
+        "is_used": false,
+        "text": null,
+        "is_capital": false,
+        "position": null
+      },
+      "value": {
+        "is_used": true,
+        "text": "",
+        "is_capital": true,
+        "position": 30
+      }
+    },
+    "kabkota": {
+      "adjust": "center",
+      "type": "text",
+      "font_size": 30,
+      "font_name": "arial",
+      "field": {
+        "is_used": false,
+        "text": null,
+        "is_capital": false,
+        "position": null
+      },
+      "delimiter": {
+        "is_used": false,
+        "text": null,
+        "is_capital": false,
+        "position": null
+      },
+      "value": {
+        "is_used": true,
+        "text": "",
+        "is_capital": true,
+        "position": 60
+      }
+    },
+    "nik": {
+      "adjust": "normal",
+      "type": "text",
+      "font_size": 42,
+      "font_name": "ocra",
+      "field": {
+        "is_used": true,
+        "text": "NIK",
+        "is_capital": false,
+        "position": [
+          30,
+          100
+        ]
+      },
+      "delimiter": {
+        "is_used": true,
+        "text": ":",
+        "is_capital": false,
+        "position": [
+          220,
+          100
+        ]
+      },
+      "value": {
+        "is_used": true,
+        "text": "",
+        "is_capital": true,
+        "position": [
+          260,
+          100
+        ]
+      }
+    },
+    "nama": {
+      "adjust": "normal",
+      "type": "text",
+      "font_size": 23,
+      "font_name": "arial",
+      "field": {
+        "is_used": true,
+        "text": "Nama",
+        "is_capital": false,
+        "position": [
+          30,
+          160
+        ]
+      },
+      "delimiter": {
+        "is_used": true,
+        "text": ":",
+        "is_capital": false,
+        "position": [
+          260,
+          160
+        ]
+      },
+      "value": {
+        "is_width_limited": true,
+        "is_used": true,
+        "text": "",
+        "is_capital": true,
+        "position": [
+          275,
+          160
+        ]
+      }
+    },
+    "ttl": {
+      "adjust": "normal",
+      "type": "text",
+      "font_size": 23,
+      "font_name": "arial",
+      "field": {
+        "is_used": true,
+        "text": "Tempat/Tgl Lahir",
+        "is_capital": false,
+        "position": [
+          30,
+          190
+        ]
+      },
+      "delimiter": {
+        "is_used": true,
+        "text": ":",
+        "is_capital": false,
+        "position": [
+          260,
+          190
+        ]
+      },
+      "value": {
+        "is_width_limited": true,
+        "is_used": true,
+        "text": "",
+        "is_capital": true,
+        "position": [
+          275,
+          190
+        ]
+      }
+    },
+    "gender": {
+      "adjust": "normal",
+      "type": "text",
+      "font_size": 23,
+      "font_name": "arial",
+      "field": {
+        "is_used": true,
+        "text": "Jenis Kelamin",
+        "is_capital": false,
+        "position": [
+          30,
+          220
+        ]
+      },
+      "delimiter": {
+        "is_used": true,
+        "text": ":",
+        "is_capital": false,
+        "position": [
+          260,
+          220
+        ]
+      },
+      "value": {
+        "is_width_limited": true,
+        "is_used": true,
+        "text": "",
+        "is_capital": true,
+        "position": [
+          275,
+          220
+        ]
+      }
+    },
+    "goldar": {
+      "adjust": "normal",
+      "type": "text",
+      "font_size": 23,
+      "font_name": "arial",
+      "field": {
+        "is_used": true,
+        "text": "Gol. Darah",
+        "is_capital": false,
+        "position": [
+          520,
+          220
+        ]
+      },
+      "delimiter": {
+        "is_used": true,
+        "text": ":",
+        "is_capital": false,
+        "position": [
+          635,
+          220
+        ]
+      },
+      "value": {
+        "is_width_limited": true,
+        "is_used": true,
+        "text": "",
+        "is_capital": true,
+        "position": [
+          640,
+          220
+        ]
+      }
+    },
+    "alamat": {
+      "adjust": "normal",
+      "type": "text",
+      "font_size": 23,
+      "font_name": "arial",
+      "field": {
+        "is_used": true,
+        "text": "Alamat",
+        "is_capital": false,
+        "position": [
+          30,
+          250
+        ]
+      },
+      "delimiter": {
+        "is_used": true,
+        "text": ":",
+        "is_capital": false,
+        "position": [
+          260,
+          250
+        ]
+      },
+      "value": {
+        "is_width_limited": true,
+        "is_used": true,
+        "text": "",
+        "is_capital": true,
+        "position": [
+          275,
+          250
+        ]
+      }
+    },
+    "rtrw": {
+      "adjust": "normal",
+      "type": "text",
+      "font_size": 23,
+      "font_name": "arial",
+      "field": {
+        "is_used": true,
+        "text": "RT/RW",
+        "is_capital": false,
+        "position": [
+          70,
+          280
+        ]
+      },
+      "delimiter": {
+        "is_used": true,
+        "text": ":",
+        "is_capital": false,
+        "position": [
+          260,
+          280
+        ]
+      },
+      "value": {
+        "is_width_limited": true,
+        "is_used": true,
+        "text": "",
+        "is_capital": true,
+        "position": [
+          275,
+          280
+        ]
+      }
+    },
+    "keldesa": {
+      "adjust": "normal",
+      "type": "text",
+      "font_size": 23,
+      "font_name": "arial",
+      "field": {
+        "is_used": true,
+        "text": "Kel/Desa",
+        "is_capital": false,
+        "position": [
+          70,
+          310
+        ]
+      },
+      "delimiter": {
+        "is_used": true,
+        "text": ":",
+        "is_capital": false,
+        "position": [
+          260,
+          310
+        ]
+      },
+      "value": {
+        "is_width_limited": true,
+        "is_used": true,
+        "text": "",
+        "is_capital": true,
+        "position": [
+          275,
+          310
+        ]
+      }
+    },
+    "kecamatan": {
+      "adjust": "normal",
+      "type": "text",
+      "font_size": 23,
+      "font_name": "arial",
+      "field": {
+        "is_used": true,
+        "text": "Kecamatan",
+        "is_capital": false,
+        "position": [
+          70,
+          340
+        ]
+      },
+      "delimiter": {
+        "is_used": true,
+        "text": ":",
+        "is_capital": false,
+        "position": [
+          260,
+          340
+        ]
+      },
+      "value": {
+        "is_width_limited": true,
+        "is_used": true,
+        "text": "",
+        "is_capital": true,
+        "position": [
+          275,
+          340
+        ]
+      }
+    },
+    "agama": {
+      "adjust": "normal",
+      "type": "text",
+      "font_size": 23,
+      "font_name": "arial",
+      "field": {
+        "is_used": true,
+        "text": "Agama",
+        "is_capital": false,
+        "position": [
+          30,
+          370
+        ]
+      },
+      "delimiter": {
+        "is_used": true,
+        "text": ":",
+        "is_capital": false,
+        "position": [
+          260,
+          370
+        ]
+      },
+      "value": {
+        "is_width_limited": true,
+        "is_used": true,
+        "text": "",
+        "is_capital": true,
+        "position": [
+          275,
+          370
+        ]
+      }
+    },
+    "status": {
+      "adjust": "normal",
+      "type": "text",
+      "font_size": 23,
+      "font_name": "arial",
+      "field": {
+        "is_used": true,
+        "text": "Status Perkawinan",
+        "is_capital": false,
+        "position": [
+          30,
+          400
+        ]
+      },
+      "delimiter": {
+        "is_used": true,
+        "text": ":",
+        "is_capital": false,
+        "position": [
+          260,
+          400
+        ]
+      },
+      "value": {
+        "is_width_limited": true,
+        "is_used": true,
+        "text": "",
+        "is_capital": true,
+        "position": [
+          275,
+          400
+        ]
+      }
+    },
+    "pekerjaan": {
+      "adjust": "normal",
+      "type": "text",
+      "font_size": 23,
+      "font_name": "arial",
+      "field": {
+        "is_used": true,
+        "text": "Pekerjaan",
+        "is_capital": false,
+        "position": [
+          30,
+          430
+        ]
+      },
+      "delimiter": {
+        "is_used": true,
+        "text": ":",
+        "is_capital": false,
+        "position": [
+          260,
+          430
+        ]
+      },
+      "value": {
+        "is_width_limited": true,
+        "is_used": true,
+        "text": "",
+        "is_capital": true,
+        "position": [
+          275,
+          430
+        ]
+      }
+    },
+    "warga": {
+      "adjust": "normal",
+      "type": "text",
+      "font_size": 23,
+      "font_name": "arial",
+      "field": {
+        "is_used": true,
+        "text": "Kewarganegaraan",
+        "is_capital": false,
+        "position": [
+          30,
+          460
+        ]
+      },
+      "delimiter": {
+        "is_used": true,
+        "text": ":",
+        "is_capital": false,
+        "position": [
+          260,
+          460
+        ]
+      },
+      "value": {
+        "is_width_limited": true,
+        "is_used": true,
+        "text": "",
+        "is_capital": true,
+        "position": [
+          275,
+          460
+        ]
+      }
+    },
+    "berlaku": {
+      "adjust": "normal",
+      "type": "text",
+      "font_size": 23,
+      "font_name": "arial",
+      "field": {
+        "is_used": true,
+        "text": "Berlaku Hingga",
+        "is_capital": false,
+        "position": [
+          30,
+          490
+        ]
+      },
+      "delimiter": {
+        "is_used": true,
+        "text": ":",
+        "is_capital": false,
+        "position": [
+          260,
+          490
+        ]
+      },
+      "value": {
+        "is_width_limited": true,
+        "is_used": true,
+        "text": "",
+        "is_capital": true,
+        "position": [
+          275,
+          490
+        ]
+      }
+    },
+    "sign_kabkota": {
+      "adjust": "center",
+      "type": "text",
+      "font_size": 19,
+      "font_name": "arial",
+      "field": {
+        "is_used": false
+      },
+      "delimiter": {
+        "is_used": false
+      },
+      "value": {
+        "is_used": true,
+        "text": "",
+        "is_capital": true,
+        "position": 410,
+        "x_center": 843,
+        "x_min": 730,
+        "x_max": 945
+      }
+    },
+    "sign_tgl": {
+      "adjust": "center",
+      "type": "text",
+      "font_size": 19,
+      "font_name": "arial",
+      "field": {
+        "is_used": false
+      },
+      "delimiter": {
+        "is_used": false
+      },
+      "value": {
+        "is_used": true,
+        "text": "",
+        "is_capital": true,
+        "position": 440,
+        "x_center": 843,
+        "x_min": 730,
+        "x_max": 945
+      }
+    },
+    "face": {
+      "type": "image",
+      "adjust": "bottom",
+      "field": {
+        "is_used": false
+      },
+      "delimiter": {
+        "is_used": false
+      },
+      "value": {
+        "is_used": true,
+        "path": "",
+        "is_capital": true,
+        "position": [
+          730,
+          130,
+          945,
+          400
+        ]
+      }
+    }
+  }
+}
