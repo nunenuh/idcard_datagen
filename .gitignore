@@ -7,3 +7,5 @@
 *.iml
 out
 gen
+*/.ipynb_checkpoints/*
+.ipynb_checkpoints/*
