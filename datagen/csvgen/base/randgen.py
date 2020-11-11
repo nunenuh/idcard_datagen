@@ -62,12 +62,13 @@ def blood_type(csv_path=None):
     choice = random_choice(data, weight)
     return choice
     
-def name(csv_path = None):
+def name(gender='male', csv_path = None):
     if csv_path == None:
             csv_path = config.csv_nama
     dframe = pd.read_csv(csv_path)
+    dframe = dframe[dframe['gender'] == gender]
     sample = dframe.sample().reset_index(drop=True)
-    sample = sample['nama'][0]
+    sample = sample['name'][0]
     return sample
 
 

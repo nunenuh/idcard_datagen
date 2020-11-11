@@ -23,19 +23,14 @@ def ktp_data():
         birthdate_list[0], birthdate_list[1], birthdate_list[2]
     )
     
-    gender = randgen.gender()
-    gname = "male"
-    if gender=="PEREMPUAN":
-        gname = "female" 
-    
     
     data = {    
         'provinsi': provinsi,
         'kabupaten': kabupaten,
         'nik': nik,
-        'nama': randgen.name(gender=gname).upper(),
+        'nama': randgen.name().upper(),
         'ttl': ttl,
-        'gender': gender,
+        'gender': randgen.gender(),
         'goldar': randgen.blood_type(),
         'alamat': randgen.address().upper(),
         'rtrw': randgen.rtrw().upper(),

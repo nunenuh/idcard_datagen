@@ -67,7 +67,7 @@ def name(csv_path = None):
             csv_path = config.csv_nama
     dframe = pd.read_csv(csv_path)
     sample = dframe.sample().reset_index(drop=True)
-    sample = sample['nama'][0]
+    sample = sample['name'][0]
     return sample
 
 
