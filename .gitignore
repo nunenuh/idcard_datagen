@@ -9,3 +9,5 @@ out
 gen
 */.ipynb_checkpoints/*
 .ipynb_checkpoints/*
+notebook/.ipynb_checkpoints/*
+notebook/.ipynb_checkpoints
