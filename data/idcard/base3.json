@@ -51,7 +51,7 @@
         "position": 30
       }
     },
-    "kabkota": {
+    "kabupaten": {
       "adjust": "center",
       "type": "text",
       "font_size": 30,
@@ -312,7 +312,7 @@
         ]
       }
     },
-    "keldesa": {
+    "kelurahan": {
       "adjust": "normal",
       "type": "text",
       "font_size": 23,
@@ -414,7 +414,7 @@
         ]
       }
     },
-    "status": {
+    "perkawinan": {
       "adjust": "normal",
       "type": "text",
       "font_size": 23,
@@ -482,7 +482,7 @@
         ]
       }
     },
-    "warga": {
+    "kewarganegaraan": {
       "adjust": "normal",
       "type": "text",
       "font_size": 23,
@@ -550,7 +550,7 @@
         ]
       }
     },
-    "sign_kabkota": {
+    "sign_place": {
       "adjust": "center",
       "type": "text",
       "font_size": 19,
@@ -571,7 +571,7 @@
         "x_max": 945
       }
     },
-    "sign_tgl": {
+    "sign_date": {
       "adjust": "center",
       "type": "text",
       "font_size": 19,
