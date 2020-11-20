@@ -8,3 +8,5 @@ csv_nama = 'data/csv_source/nama.csv'
 csv_address = 'data/csv_source/alamat.csv'
 
 random_seed = 1261
+
+

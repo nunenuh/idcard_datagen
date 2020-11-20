@@ -5,8 +5,8 @@ from . import randgen
 from . import config
 
 
-def ktp_data():
-    wilayah = randgen.wilayah()
+def ktp_data(kode_wilayah=None):
+    wilayah = randgen.wilayah(kode_wilayah)
     provinsi = "PROVINSI " + wilayah['prov']['nama'].upper()
     kabupaten = wilayah['kab']['nama'].upper()
     kecamatan = wilayah['kec']['nama'].upper()
@@ -53,7 +53,7 @@ def ktp_data():
     return data
 
 
-def ktp_generator(num_data:int, seed=None):
+def ktp_generator(num_data:int, kode_wilayah=None, seed=None):
     if seed==None:
         random.seed(config.random_seed)
         
@@ -79,7 +79,7 @@ def ktp_generator(num_data:int, seed=None):
     }
        
     for idx in tqdm(range(num_data)):
-        kdata = ktp_data()
+        kdata = ktp_data(kode_wilayah=kode_wilayah)
         for k,v in kdata.items():
             data[k].append(v)
             

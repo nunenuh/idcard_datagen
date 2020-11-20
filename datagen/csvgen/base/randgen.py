@@ -162,7 +162,7 @@ def pekerjaan(csv_path=None):
 
 def clean_kab_text(text):
     if text.startswith('KOTA ADM.'):
-        text = text.replace('KOTA ADM. ','KOTA')
+        text = text.replace('KOTA ADM. ','')
     if text.startswith("KAB."):
         text = text.replace('KAB. ','KABUPATEN ')
     if text.startswith("KAB"):
@@ -174,10 +174,11 @@ def wilayah(kode_wilayah=None, csv_path=None):
     if csv_path == None:
         csv_path = config.csv_wilayah
     
-    if kode_wilayah !=None:
-        pass
-    
     df = pd.read_csv(csv_path)
+    
+    if kode_wilayah != None:
+       df = wilayah_filter(df, kode_wilayah)
+    
     dfkel = df[df['kode'].str.len()>8]
     kel_sample = dfkel.sample().reset_index(drop=True)
     
@@ -198,6 +199,18 @@ def wilayah(kode_wilayah=None, csv_path=None):
 
     
     return dout
+
+
+def wilayah_filter(dframe, kode):
+    if type(kode) == str:
+        dframe = dframe[dframe['kode'].str.startswith(str(kode))]
+    elif type(kode) == list:
+        frames = [dframe[dframe['kode'].str.startswith(str(kd))] for kd in kode]
+        dframe= pd.concat(frames)
+    else:
+        raise ValueError("Kode value must be string of number or list of string of number!")
+    
+    return dframe
 
 
 def nik(kp, kb, kl, kd, km, ky):
