@@ -1,1 +1,0 @@
-python idcard_combiner.py --bg_path data/background --idcard_path results/base --dst_path results/combined
