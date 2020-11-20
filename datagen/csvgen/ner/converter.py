@@ -48,8 +48,10 @@ def text_tag_labeling(record, flatten_list=False):
                 for field_key in vfk:
                     if field_key in value:
                         vfk = field_key
-#             print(vfk)
-#             print(value)
+                    else:
+                        vfk = "KOTA" # for kota in dki jakarta only
+            # print(vfk)
+            # print(value)
             
             val = value.replace(vfk, "")
             val = val.strip().split(" ")
