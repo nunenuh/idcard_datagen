@@ -1,0 +1,3 @@
+pandas
+numpy
+si-prefix
