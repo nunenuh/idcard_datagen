@@ -7,6 +7,8 @@ import numpy as np
 import json
 
 
+from collections import OrderedDict
+
 from datagen.imgen.ops import boxes_ops
 from datagen.imgen import transforms
 from datagen.imgen.content import utils as content_utils
@@ -17,18 +19,21 @@ from tqdm import tqdm
 
 
 def combine(bg_path, idcard_path, dst_path,
-            idcard_ext="png", bg_ext="jpg|png",
+            idcard_ext="png", bg_ext="jpg|png", bg_size=None,
             angle: int = 30, shear: float = 0.5,
-            scale_ratio: tuple = (0.3, 0.8),
+            scale_ratio: str = "0.3,0.8",
             num_generated: int = 6):
 
+    
     bg_data, bg_path = clean_background_data(bg_path, bg_ext)
     idcard_image_data, idcard_json_data = clean_idcard_data(
-        idcard_path, image_ext=idcard_ext)
-    dst_path, base_path = clean_destination_path(dst_path)
-    angle, shear, scale_ratio, num_generated = clean_augment_param(
-        angle, shear, scale_ratio, num_generated
+        idcard_path, image_ext=idcard_ext
     )
+    bg_size = clean_background_size(bg_size)
+    dst_path, base_path = clean_destination_path(dst_path)
+    
+    augment_param = clean_augment_param(angle, shear, scale_ratio, num_generated)
+    angle, shear, scale_ratio, num_generated  = augment_param
 
     c = 0
     tc = len(bg_data) * len(idcard_image_data) * num_generated
@@ -46,45 +51,46 @@ def combine(bg_path, idcard_path, dst_path,
 
                 id_img = cv.imread(str(idfile), cv.IMREAD_UNCHANGED)
                 bg_img = cv.imread(str(bgfile), cv.IMREAD_COLOR)
+                json_data = open_json_file(jsfile)
+                
+                
+                if bg_size != None:
+                    bg_img =cv.resize(bg_img, bg_size, interpolation=cv.INTER_LINEAR)
 
-                with open(str(jsfile), 'r') as js_file:
-                    json_data = json.load(js_file)
 
-                # print(jsfile, idfile)
-                boxes, cnames, scnames, sequence, texts = content_utils.convert_json_boxes_to_numpy(
-                    json_data)
+                # reformat json data
+                data_record  = content_utils.reformat_json_data(json_data)
+                boxes, cnames, scnames, texts, labels, sequence, genseq = data_record
+                
+                #prepare for augment
                 boxes = boxes.reshape(-1, 8)
-
                 ratio = random.choice(scale_ratio)
-                # print(f'Choiced Ratio: {ratio}')
-                augment = transforms.AugmentGenerator(
-                    scale_ratio=ratio, angle=angle, shear_factor=shear)
+                augment = transforms.AugmentGenerator(scale_ratio=ratio, angle=angle, shear_factor=shear)
                 seg_img, cmp_img, boxes = augment(bg_img, id_img, boxes)
                 seg_img = (seg_img * 255).astype(np.uint8)
 
+                #prepare for creating child_boxes
                 main_boxes = boxes[0].copy()
-                # print(f'main_boxes shape: {main_boxes.shape}')
-
                 main_boxes = boxes_ops.order_points(main_boxes).tolist()
-
                 child_boxes = boxes[1:len(boxes)].copy()
-                # print(child_boxes.shape)
-                child_boxes = boxes_ops.order_points_batch(
-                    child_boxes).tolist()
+                child_boxes = boxes_ops.order_points_batch(child_boxes).tolist()
+                
+                #build and append every text
                 objects = []
-
-                for (cbox, cn, scn, seq, txt) in zip(child_boxes, cnames, scnames, sequence, texts):
-                    dt = {
-                        'text': txt, 'points': cbox,
+                zipped_iter = [child_boxes, cnames, scnames, texts, labels, sequence, genseq]
+                for (cbox, cn, scn, txt, lbl, seq, gs) in zip(*zipped_iter):
+                    dt = OrderedDict({
+                        'text': txt, 
+                        'points': cbox,
                         'classname': data_config.classname_list[cn],
                         'subclass': data_config.subclassname_list[scn],
-                        'sequence': seq
-                    }
-
-                    # print(idcard.classname_list[cn])
-
+                        'label': lbl,
+                        'sequence': seq,
+                        'genseq': gs,
+                    })
                     objects.append(dt)
-
+                    
+                #prepare for savinf data
                 rnum = str(random.randrange(0, 999999))
                 image_fpath = base_path.joinpath(f'{rnum}_image.jpg')
                 mask_fpath = base_path.joinpath(f'{rnum}_mask.jpg')
@@ -105,6 +111,10 @@ def combine(bg_path, idcard_path, dst_path,
                 fop.save_json_file(str(json_fpath), json_dict)
                 c = c + 1
 
+def open_json_file(path):
+    with open(str(path), 'r') as js_file:
+        json_data = json.load(js_file)
+    return json_data
 
 def clean_background_data(bg_path, bg_path_ext="jpg|png"):
     bg_path = Path(bg_path)
@@ -119,6 +129,14 @@ def clean_background_data(bg_path, bg_path_ext="jpg|png"):
         f'Logs: Loading {len(bg_data)} data from {str(bg_path)} as background')
     return bg_data, bg_path
 
+def clean_background_size(bg_size):
+    if bg_size != None:
+        if 'x' in bg_size:
+            w , h = bg_size.split('x')
+            bg_size = (int(w),int(h))
+        else:
+            raise ValueError(f"--bg_size format error fill with WxH format, e.g 1200x1000")
+    return bg_size
 
 def clean_idcard_data(idcard_path, image_ext="png"):
     idcard_path = Path(idcard_path)
@@ -153,8 +171,9 @@ def clean_augment_param(angle, shear, scale_ratio, num_generated):
     shear = float(shear)
 
     sfactor = 0.1
-    scale_ratio: list = [i for i in np.arange(
-        scale_ratio[0], scale_ratio[1], sfactor)]
+    scale_ratio = scale_ratio.split(",")
+    scale_ratio = [float(ratio.strip()) for ratio in scale_ratio]
+    scale_ratio: list = [i for i in np.arange(scale_ratio[0], scale_ratio[1], sfactor)]
 
     num_generated = int(num_generated)
     print(f'Info: angle={str(angle)} shear_factor={str(shear)} '

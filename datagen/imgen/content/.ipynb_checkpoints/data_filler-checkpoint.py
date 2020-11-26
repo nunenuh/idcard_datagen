@@ -5,7 +5,6 @@ import numpy as np
 from ..ops import imtext_ops
 from . import base_filler, draw
 from . import utils
-from . import ner_utils
 
 
 def fill_data(image, data_value, file_path: str = 'data/idcard/base3.json', pad_factor=0.01):
@@ -116,18 +115,26 @@ def fill_data(image, data_value, file_path: str = 'data/idcard/base3.json', pad_
                                             x_max=value.get("x_max", 0),
                                             adjust=adjust, font_name=font_name, font_size=font_size)
                     
-                    data = utils.inject_subclass_and_sequence(data)
+                    data = inject_subclass(data)
                     datas = datas + data
 
         elif obj.get("type") == "image":
             pos = obj.get('value').get('position')
             fpath = obj.get('value').get('path')
             image = base_filler.fill_photo(image, fpath, face_position=pos)
-    
-            
-    datas = ner_utils.label_genseq_injector(datas)
-    # print(datas)
+
     return image, datas
 
 
+def inject_subclass(data):
+    cname = data[0]['classname'] 
+    text = data[0]['text']
+    
+    if cname  == 'provinsi':
+        data[0]['subclass'] = 'field'
+
+    if  cname == 'kabupaten' and ( text == "KOTA" or text == 'KABUPATEN'):
+            data[0]['subclass'] = 'field'
+            
+    return data
     
