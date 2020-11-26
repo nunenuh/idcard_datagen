@@ -34,9 +34,9 @@
       "font_name": "arial",
       "field": {
         "is_used": false,
-        "text": null,
-        "is_capital": false,
-        "position": null
+        "text": "PROVINSI",
+        "is_capital": true,
+        "position": 30
       },
       "delimiter": {
         "is_used": false,
@@ -58,9 +58,9 @@
       "font_name": "arial",
       "field": {
         "is_used": false,
-        "text": null,
+        "text": ["KABUPATEN", "KOTA"],
         "is_capital": false,
-        "position": null
+        "position": 60
       },
       "delimiter": {
         "is_used": false,
