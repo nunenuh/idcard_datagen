@@ -34,82 +34,90 @@ def combine(bg_path, idcard_path, dst_path,
     
     augment_param = clean_augment_param(angle, shear, scale_ratio, num_generated)
     angle, shear, scale_ratio, num_generated  = augment_param
+    
+    bg_data = bg_data_balancer(bg_data, idcard_image_data)
+
 
     c = 0
-    tc = len(bg_data) * len(idcard_image_data) * num_generated
-    bg_bar = tqdm(bg_data)
-    for bgfile in bg_bar:
-        bg_bar.set_description(f"Progress All Data ({str(c)}/{str(tc)})")
-        idcard_bar = tqdm(zip(idcard_image_data, idcard_json_data))
-        for (idfile, jsfile) in idcard_bar:
-            for n in range(num_generated):
+    tc = len(idcard_image_data) * num_generated
+    idcard_bar = tqdm(zip(bg_data, idcard_image_data, idcard_json_data))
+    for (bgfile, idfile, jsfile) in idcard_bar:
+        for n in range(num_generated):
 
-                bg_bar.set_description(
-                    f"Progress All Data ({str(c)}/{str(tc)})")
-                idcard_bar.set_description(
-                    f"Processing augmented ({str(n)}/{str(num_generated)}) saved to {str(base_path)}")
+            info =  f"Progress ({str(c)}/{str(tc)}): "
+            info += f"Processing augmented ({str(n)}/{str(num_generated)}) saved to {str(base_path)}"
+            idcard_bar.set_description(info)
 
-                id_img = cv.imread(str(idfile), cv.IMREAD_UNCHANGED)
-                bg_img = cv.imread(str(bgfile), cv.IMREAD_COLOR)
-                json_data = open_json_file(jsfile)
+            id_img = cv.imread(str(idfile), cv.IMREAD_UNCHANGED)
+            bg_img = cv.imread(str(bgfile), cv.IMREAD_COLOR)
+            json_data = open_json_file(jsfile)
+            
+            
+            if bg_size != None:
+                bg_img =cv.resize(bg_img, bg_size, interpolation=cv.INTER_LINEAR)
+
+            # reformat json data
+            data_record  = content_utils.reformat_json_data(json_data)
+            boxes, cnames, scnames, texts, labels, sequence, genseq = data_record
+            
+            #prepare for augment
+            boxes = boxes.reshape(-1, 8)
+            ratio = random.choice(scale_ratio)
+            augment = transforms.AugmentGenerator(scale_ratio=ratio, angle=angle, shear_factor=shear)
+            seg_img, cmp_img, boxes = augment(bg_img, id_img, boxes)
+            seg_img = (seg_img * 255).astype(np.uint8)
+
+            #prepare for creating child_boxes
+            main_boxes = boxes[0].copy()
+            main_boxes = boxes_ops.order_points(main_boxes).tolist()
+            child_boxes = boxes[1:len(boxes)].copy()
+            child_boxes = boxes_ops.order_points_batch(child_boxes).tolist()
+            
+            #build and append every text
+            objects = []
+            zipped_iter = [child_boxes, cnames, scnames, texts, labels, sequence, genseq]
+            for (cbox, cn, scn, txt, lbl, seq, gs) in zip(*zipped_iter):
+                dt = OrderedDict({
+                    'text': txt, 
+                    'points': cbox,
+                    'classname': data_config.classname_list[cn],
+                    'subclass': data_config.subclassname_list[scn],
+                    'label': lbl,
+                    'sequence': seq,
+                    'genseq': gs,
+                })
+                objects.append(dt)
+                
+            #prepare for savinf data
+            rnum = str(random.randrange(0, 999999))
+            image_fpath = base_path.joinpath(f'{rnum}_image.jpg')
+            mask_fpath = base_path.joinpath(f'{rnum}_mask.jpg')
+            json_fpath = base_path.joinpath(f'{rnum}_json.json')
+
+            cv.imwrite(str(image_fpath), cmp_img)
+            cv.imwrite(str(mask_fpath), seg_img)
+
+            json_dict = {
+                'image': {'filename': str(image_fpath.name), 'dim': cmp_img.shape},
+                'mask': {'filename': str(mask_fpath.name), 'dim': seg_img.shape},
+                'scale_ratio': ratio,
+                'angle': augment.actual_angle,
+                'shear_factor': augment.actual_shear,
+                'box': main_boxes,
+                'objects': objects,
+            }
+            fop.save_json_file(str(json_fpath), json_dict)
+            c = c + 1
                 
                 
-                if bg_size != None:
-                    bg_img =cv.resize(bg_img, bg_size, interpolation=cv.INTER_LINEAR)
-
-
-                # reformat json data
-                data_record  = content_utils.reformat_json_data(json_data)
-                boxes, cnames, scnames, texts, labels, sequence, genseq = data_record
-                
-                #prepare for augment
-                boxes = boxes.reshape(-1, 8)
-                ratio = random.choice(scale_ratio)
-                augment = transforms.AugmentGenerator(scale_ratio=ratio, angle=angle, shear_factor=shear)
-                seg_img, cmp_img, boxes = augment(bg_img, id_img, boxes)
-                seg_img = (seg_img * 255).astype(np.uint8)
-
-                #prepare for creating child_boxes
-                main_boxes = boxes[0].copy()
-                main_boxes = boxes_ops.order_points(main_boxes).tolist()
-                child_boxes = boxes[1:len(boxes)].copy()
-                child_boxes = boxes_ops.order_points_batch(child_boxes).tolist()
-                
-                #build and append every text
-                objects = []
-                zipped_iter = [child_boxes, cnames, scnames, texts, labels, sequence, genseq]
-                for (cbox, cn, scn, txt, lbl, seq, gs) in zip(*zipped_iter):
-                    dt = OrderedDict({
-                        'text': txt, 
-                        'points': cbox,
-                        'classname': data_config.classname_list[cn],
-                        'subclass': data_config.subclassname_list[scn],
-                        'label': lbl,
-                        'sequence': seq,
-                        'genseq': gs,
-                    })
-                    objects.append(dt)
-                    
-                #prepare for savinf data
-                rnum = str(random.randrange(0, 999999))
-                image_fpath = base_path.joinpath(f'{rnum}_image.jpg')
-                mask_fpath = base_path.joinpath(f'{rnum}_mask.jpg')
-                json_fpath = base_path.joinpath(f'{rnum}_json.json')
-
-                cv.imwrite(str(image_fpath), cmp_img)
-                cv.imwrite(str(mask_fpath), seg_img)
-
-                json_dict = {
-                    'image': {'filename': str(image_fpath.name), 'dim': cmp_img.shape},
-                    'mask': {'filename': str(mask_fpath.name), 'dim': seg_img.shape},
-                    'scale_ratio': ratio,
-                    'angle': augment.actual_angle,
-                    'shear_factor': augment.actual_shear,
-                    'box': main_boxes,
-                    'objects': objects,
-                }
-                fop.save_json_file(str(json_fpath), json_dict)
-                c = c + 1
+def bg_data_balancer(bg_data, idcard_image_data):
+    if len(idcard_image_data) > len(bg_data):
+        mn_factor = len(idcard_image_data) // len(bg_data)
+        bg_data = bg_data * mn_factor * 2
+        bg_data = random.choices(bg_data, k=len(idcard_image_data))
+    else:
+        bg_data = random.choices(bg_data, k=len(idcard_image_data))
+    return bg_data
 
 def open_json_file(path):
     with open(str(path), 'r') as js_file:
@@ -180,3 +188,4 @@ def clean_augment_param(angle, shear, scale_ratio, num_generated):
           f'scale_ratio={str(scale_ratio)}')
 
     return angle, shear, scale_ratio, num_generated
+
