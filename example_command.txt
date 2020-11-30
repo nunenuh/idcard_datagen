@@ -1,4 +1,5 @@
 python generator_csv.py --num 1000 --dst_path results/csv --kode "31|52"
+python generator_csv.py --num 20000 --dst_path /data/idcard/csv --kode "31|32|33|34|35"
 
 
 python generator_idcard.py --csv_path results/csv/idcard_100_1605981819.csv \
@@ -6,7 +7,23 @@ python generator_idcard.py --csv_path results/csv/idcard_100_1605981819.csv \
 --json_path data/idcard/base3.json --photo_path data/face/
 
 
+python generator_idcard.py --csv_path /data/idcard/csv/idcard_100k_1606406736.csv \
+--dst_path  /data/idcard/base_100k --image_path data/idcard/base3.png \
+--json_path data/idcard/base3.json --photo_path data/face/
+
+
 python combiner_idcard.py --bg_path data/background --bg_size "1280x960" \
 --idcard_path results/base --dst_path results/combined \
 --angle 15 --scale_ratio "0.5, 0.9" --shear 0.2 \
---num_generated 3 
+--num_generated 3
+
+
+python combiner_idcard.py --bg_path data/background --bg_size "1000x750" \
+--idcard_path /data/idcard/base --dst_path /data/idcard/combined \
+--angle 15 --scale_ratio "0.85, 1.0" --shear 0.2 \
+--num_generated 1
+
+python combiner_idcard.py --bg_path data/background --bg_size "1000x750" \
+--idcard_path /data/idcard/base_100k --dst_path /data/idcard/combined \
+--angle 15 --scale_ratio "0.89, 1.0" --shear 0.2 \
+--num_generated 10

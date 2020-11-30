@@ -45,9 +45,10 @@ class RandomRotation(object):
     https://blog.paperspace.com/data-augmentation-for-object-detection-rotation-and-shearing/
     """
 
-    def __init__(self, angle, randomize=True):
+    def __init__(self, angle, randomize=True, rand_prob=0.5):
         self.angle = angle
         self.randomize = randomize
+        self.rand_prob = rand_prob
         if randomize:
             if type(self.angle) == tuple:
                 assert len(self.angle) == 2, "Invalid range"
@@ -56,7 +57,10 @@ class RandomRotation(object):
 
     def __call__(self, image: np.ndarray, boxes: np.ndarray) -> Tuple[Any, Any]:
         if self.randomize:
-            angle = random.uniform(*self.angle)
+            if F.coin_toss(p=self.rand_prob):
+                angle = random.uniform(*self.angle)
+            else:
+                angle = 0
         else:
             angle = self.angle
 
@@ -79,9 +83,10 @@ class RandomRotation(object):
 
 
 class RandomShear(object):
-    def __init__(self, shear_factor=0.2, randomize=True):
+    def __init__(self, shear_factor=0.2, randomize=True, rand_prob=0.5):
         self.shear_factor = shear_factor
         self.randomize = randomize
+        self.rand_prob = rand_prob
         if randomize:
             if type(self.shear_factor) == tuple:
                 assert len(self.shear_factor) == 2, "Invalid range for scaling factor"
@@ -90,7 +95,10 @@ class RandomShear(object):
 
     def __call__(self, image, boxes):
         if self.randomize:
-            shear_factor = random.uniform(*self.shear_factor)
+            if F.coin_toss(p=self.rand_prob):
+                shear_factor = random.uniform(*self.shear_factor)
+            else:
+                shear_factor = 0.0
         else:
             shear_factor = self.shear_factor
             
@@ -100,14 +108,16 @@ class RandomShear(object):
 
 
 class RandomAugment(object):
-    def __init__(self, angle=45, shear_factor=0.3, randomize=True):
+    def __init__(self, angle=45, shear_factor=0.3, 
+                 randomize=True, rand_prob=0.5):
         self.angle = angle
         self.shear_factor = shear_factor
         self.randomize = randomize
+        self.rand_prob = rand_prob
 
     def __call__(self, image, boxes):
-        rotate = RandomRotation(self.angle, randomize=self.randomize)
-        shear = RandomShear(shear_factor=self.shear_factor, randomize=self.randomize)
+        rotate = RandomRotation(self.angle, randomize=self.randomize, rand_prob=self.rand_prob)
+        shear = RandomShear(shear_factor=self.shear_factor, randomize=self.randomize, rand_prob=self.rand_prob)
 
         rimage, rboxes, angle = rotate(image, boxes)
         simage, sboxes, factor = shear(rimage, rboxes)
@@ -119,15 +129,21 @@ class RandomAugment(object):
 
 
 class AugmentGenerator(object):
-    def __init__(self, scale_ratio=0.25, angle=45, shear_factor=0.3, randomize=True):
+    def __init__(self, scale_ratio=0.25, angle=45, shear_factor=0.3, 
+                 randomize=True, rand_prob=0.5):
         self.scale_ratio = scale_ratio
         self.angle = angle
         self.shear_factor = shear_factor
         self.randomize = randomize
+        self.rand_prob = rand_prob
 
     def __call__(self, background_image, foreground_image, boxes: np.ndarray = None):
         # boxes = F.corner_from_shape(foreground_image)
-        random_augment = RandomAugment(self.angle, self.shear_factor, self.randomize)
+        random_augment = RandomAugment(
+            self.angle, self.shear_factor, 
+            randomize=self.randomize, 
+            rand_prob=self.rand_prob
+        )
         foreground_image, boxes = random_augment(foreground_image, boxes)
 
         self.actual_angle = random_augment.rotation_angle

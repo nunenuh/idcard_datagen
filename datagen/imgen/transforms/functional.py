@@ -1,5 +1,13 @@
 import numpy as np
 import cv2 as cv
+import random
+
+
+def coin_toss(p=0.5):
+    pf = 1-p
+    ot, wt = [True, False], [p, pf]
+    res = random.choices(population=ot, weights=wt, k=1)
+    return res[0]
 
 
 def rotate_image(image, angle):
