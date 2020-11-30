@@ -7,8 +7,8 @@ python generator_idcard.py --csv_path results/csv/idcard_100_1605981819.csv \
 --json_path data/idcard/base3.json --photo_path data/face/
 
 
-python generator_idcard.py --csv_path /data/idcard/csv/idcard_20k_1606381181.csv \
---dst_path  /data/idcard/base --image_path data/idcard/base3.png \
+python generator_idcard.py --csv_path /data/idcard/csv/idcard_100k_1606406736.csv \
+--dst_path  /data/idcard/base_100k --image_path data/idcard/base3.png \
 --json_path data/idcard/base3.json --photo_path data/face/
 
 
@@ -22,3 +22,8 @@ python combiner_idcard.py --bg_path data/background --bg_size "1000x750" \
 --idcard_path /data/idcard/base --dst_path /data/idcard/combined \
 --angle 15 --scale_ratio "0.85, 1.0" --shear 0.2 \
 --num_generated 1
+
+python combiner_idcard.py --bg_path data/background --bg_size "1000x750" \
+--idcard_path /data/idcard/base_100k --dst_path /data/idcard/combined \
+--angle 15 --scale_ratio "0.89, 1.0" --shear 0.2 \
+--num_generated 10
