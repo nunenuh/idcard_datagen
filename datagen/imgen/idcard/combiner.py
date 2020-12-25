@@ -188,4 +188,3 @@ def clean_augment_param(angle, shear, scale_ratio, num_generated):
           f'scale_ratio={str(scale_ratio)}')
 
     return angle, shear, scale_ratio, num_generated
-

@@ -2,6 +2,8 @@ import numpy as np
 import cv2 as cv
 import random
 
+from skimage import data, exposure, filters
+
 
 def coin_toss(p=0.5):
     pf = 1-p
@@ -118,3 +120,64 @@ def shear_image_boxes(image, boxes, shear_factor):
     boxes = boxes / scale_mat
     
     return image, boxes
+
+
+def adjust_gamma(image, gamma=1.0):
+    # build a lookup table mapping the pixel values [0, 255] to
+	# their adjusted gamma values
+	invGamma = 1.0 / gamma
+	table = np.array([((i / 255.0) ** invGamma) * 255
+		for i in np.arange(0, 256)]).astype("uint8")
+ 
+	# apply gamma correction using the lookup table
+	return cv.LUT(image, table)
+
+def contrast(image, level, min=1.0, max=3.0):
+    clevel = (level * (max - min) / 100) + min
+    contrasted_image = image_scale_abs(image, contrast_level=clevel)
+    return contrasted_image
+    
+def brightness(image, level):
+    brightned_image = image_scale_abs(image, brightness_level=level)
+    return brightned_image
+
+def image_scale_abs(image, contrast_level=1.0, brightness_level=1):
+    # alpha = 1 # Contrast control (1.0-3.0)
+    # beta = 0 # Brightness control (0-100)
+    alpha, beta = contrast_level, brightness_level
+    adjusted = cv.convertScaleAbs(image, alpha=alpha, beta=beta)
+    return adjusted
+
+def gaussian_blur(image, sigma=1.6):
+    img_gauss = filters.gaussian(image, sigma=sigma)
+    return img_gauss
+
+def median_blur(image):
+    img_med = filters.median(image)
+    return img_med
+
+def hue_shifting(image, shift):
+    hsv = cv.cvtColor(image, cv.COLOR_BGR2HSV)
+    h, s, v = cv.split(hsv)
+    shift_h = (h + shift) % 180
+    shift_hsv = cv.merge([shift_h, s, v])
+    shift_img = cv.cvtColor(shift_hsv, cv.COLOR_HSV2BGR)
+    return shift_img
+
+def channel_shuffle(image):
+    if len(image.shape)==3:
+        b,g,r,a = cv.split(image)
+        chan = [b,g,r]
+        random.shuffle(chan)
+        chan.append(a)
+        rand_chan_image = cv.merge(chan)
+    elif len(image.shape)==2:
+        b,g,r = cv.split(image)
+        chan = [b,g,r]
+        random.shuffle(chan)
+        rand_chan_image = cv.merge(chan)
+    else:
+        #reject later
+        raise Exception("Image Channel must be more than BGR or BGRA, grayscale is not accepted")
+    
+    return rand_chan_image

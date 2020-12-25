@@ -105,7 +105,37 @@ class RandomShear(object):
         image, boxes = F.shear_image_boxes(image, boxes, shear_factor)
 
         return image, boxes, shear_factor
+    
+    
+class RandomGammaAdjustment(object):
+    def __init__(self, gamma_range=(1.0, 2.0), 
+                 randomize=True, rand_prob=0.5):
+        self.gamma = gamma_range
+        self.randomize = randomize
+        self.rand_prob = rand_prob
+    
+    def __call__(self, image):
+        if self.randomize and F.coin_toss(p=self.rand_prob):
+            self.gamma = random.uniform(*self.gamma)
+            image = F.adjust_gamma(image, self.gamma)
 
+        return image
+    
+
+class RandomContrast(object):
+    def __init__(self, level_range=(10,30), 
+                 randomize=True, rand_prob=0.5):
+        self.level = level_range
+        self.randomize = randomize
+        self.rand_prob = rand_prob
+    
+    def __call__(self, image):
+        if self.randomize and F.coin_toss(p=self.rand_prob):
+            self.level = int(random.uniform(*self.level))
+            image = F.contrast(image, self.level)
+
+        return image
+            
 
 class RandomAugment(object):
     def __init__(self, angle=45, shear_factor=0.3, 
@@ -126,6 +156,7 @@ class RandomAugment(object):
         self.shear_factor = factor
 
         return simage, sboxes
+
 
 
 class AugmentGenerator(object):
