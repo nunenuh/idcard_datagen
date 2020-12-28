@@ -121,23 +121,21 @@ def shear_image_boxes(image, boxes, shear_factor):
     
     return image, boxes
 
-
 def adjust_gamma(image, gamma=1.0):
     # build a lookup table mapping the pixel values [0, 255] to
-	# their adjusted gamma values
-	invGamma = 1.0 / gamma
-	table = np.array([((i / 255.0) ** invGamma) * 255
+    # their adjusted gamma values
+    invGamma = 1.0 / gamma
+    table = np.array([((i / 255.0) ** invGamma) * 255
 		for i in np.arange(0, 256)]).astype("uint8")
- 
-	# apply gamma correction using the lookup table
-	return cv.LUT(image, table)
+    # apply gamma correction using the lookup table
+    return cv.LUT(image, table)
 
-def contrast(image, level, min=1.0, max=3.0):
+def adjust_contrast(image, level, min=0.5, max=1.5):
     clevel = (level * (max - min) / 100) + min
     contrasted_image = image_scale_abs(image, contrast_level=clevel)
     return contrasted_image
     
-def brightness(image, level):
+def adjust_brightness(image, level):
     brightned_image = image_scale_abs(image, brightness_level=level)
     return brightned_image
 
@@ -148,15 +146,44 @@ def image_scale_abs(image, contrast_level=1.0, brightness_level=1):
     adjusted = cv.convertScaleAbs(image, alpha=alpha, beta=beta)
     return adjusted
 
-def gaussian_blur(image, sigma=1.6):
-    img_gauss = filters.gaussian(image, sigma=sigma)
+def gaussian_blur(image, sigma=1.6, ksize=(5,5)):
+    img_gauss = cv.GaussianBlur(image, ksize=ksize, sigmaX=sigma)
     return img_gauss
 
-def median_blur(image):
-    img_med = filters.median(image)
-    return img_med
+def median_blur(image, ksize=5):
+    img_median = cv.medianBlur(image, ksize)
+    return img_median
 
-def hue_shifting(image, shift):
+def dilation_morphology(image, shift, iterations=1):
+    kernel = np.ones((shift, shift), np.uint8)
+    image = cv.dilate(image, kernel, iterations=iterations)
+    return image
+
+def opening_morphology(image, shift):
+    kernel = np.ones((shift, shift), np.uint8)
+    image = cv.morphologyEx(image, cv.MORPH_OPEN, kernel)
+    return image
+
+def closing_morphology(image, shift):
+    kernel = np.ones((shift, shift), np.uint8)
+    image = cv.morphologyEx(image, cv.MORPH_CLOSE, kernel)
+    return image
+
+def sharp(image):
+    kernel = np.array([[-1,-1,-1], 
+                       [-1, 9,-1],
+                       [-1,-1,-1]])
+    sharpened = cv.filter2D(image, -1, kernel)
+    return sharpened
+
+def emboss(image):
+    kernel=np.array([[0,-1,-1],
+                     [1, 0,-1],
+                     [1, 1, 0]])
+    image = cv.filter2D(image, -1, kernel) + 128
+    return image
+
+def hue_shifting(image, shift=16):
     hsv = cv.cvtColor(image, cv.COLOR_BGR2HSV)
     h, s, v = cv.split(hsv)
     shift_h = (h + shift) % 180
@@ -181,3 +208,4 @@ def channel_shuffle(image):
         raise Exception("Image Channel must be more than BGR or BGRA, grayscale is not accepted")
     
     return rand_chan_image
+
