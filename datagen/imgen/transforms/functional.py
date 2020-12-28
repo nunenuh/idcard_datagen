@@ -130,7 +130,7 @@ def adjust_gamma(image, gamma=1.0):
     # apply gamma correction using the lookup table
     return cv.LUT(image, table)
 
-def adjust_contrast(image, level, min=0.5, max=1.5):
+def adjust_contrast(image, level, min=1, max=3):
     clevel = (level * (max - min) / 100) + min
     contrasted_image = image_scale_abs(image, contrast_level=clevel)
     return contrasted_image
@@ -147,7 +147,7 @@ def image_scale_abs(image, contrast_level=1.0, brightness_level=1):
     return adjusted
 
 def gaussian_blur(image, sigma=1.6, ksize=(5,5)):
-    img_gauss = cv.GaussianBlur(image, ksize=ksize, sigmaX=sigma)
+    img_gauss = cv.GaussianBlur(image, ksize=ksize, sigmaX=sigma, sigmaY=sigma)
     return img_gauss
 
 def median_blur(image, ksize=5):
@@ -169,7 +169,7 @@ def closing_morphology(image, shift):
     image = cv.morphologyEx(image, cv.MORPH_CLOSE, kernel)
     return image
 
-def sharp(image):
+def sharpen(image):
     kernel = np.array([[-1,-1,-1], 
                        [-1, 9,-1],
                        [-1,-1,-1]])
@@ -192,13 +192,13 @@ def hue_shifting(image, shift=16):
     return shift_img
 
 def channel_shuffle(image):
-    if len(image.shape)==3:
+    if len(image.shape)==4:
         b,g,r,a = cv.split(image)
         chan = [b,g,r]
         random.shuffle(chan)
         chan.append(a)
         rand_chan_image = cv.merge(chan)
-    elif len(image.shape)==2:
+    elif len(image.shape)==3:
         b,g,r = cv.split(image)
         chan = [b,g,r]
         random.shuffle(chan)
@@ -208,4 +208,7 @@ def channel_shuffle(image):
         raise Exception("Image Channel must be more than BGR or BGRA, grayscale is not accepted")
     
     return rand_chan_image
+
+
+
 
