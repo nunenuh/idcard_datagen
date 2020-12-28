@@ -207,7 +207,7 @@ def shadow_process(image,no_of_shadows,x1,y1,x2,y2, shadow_dimension):
     image_RGB = cv.cvtColor(image_HLS,cv.COLOR_HLS2RGB) ## Conversion to RGB
     return image_RGB
 
-def add_shadow(image,no_of_shadows=1,rectangular_roi=(-1,-1,-1,-1), shadow_dimension=5):## ROI:(top-left x1,y1, bottom-right x2,y2), shadow_dimension=no. of sides of polygon generated
+def add_shadow(image, no_of_shadows=1, rectangular_roi=(-1,-1,-1,-1), shadow_dimension=5):## ROI:(top-left x1,y1, bottom-right x2,y2), shadow_dimension=no. of sides of polygon generated
     verify_image(image)
     if not(is_numeric(no_of_shadows) and no_of_shadows>=1 and no_of_shadows<=10):
         raise Exception(err_shadow_count)
