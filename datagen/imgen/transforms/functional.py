@@ -121,6 +121,21 @@ def shear_image_boxes(image, boxes, shear_factor):
     
     return image, boxes
 
+
+def resize_image_boxes(image, boxes, size, interpolation=cv.INTER_LINEAR):
+        resized_image = cv.resize(image, size, interpolation=interpolation)
+
+        oH, oW = image.shape[:2]
+        rH, rW = resized_image.shape[:2]
+        scf_x, scf_y = oW / rW, oH / rH
+        scale_mat = [
+            scf_x, scf_y, scf_x, scf_y,
+            scf_x, scf_y, scf_x, scf_y
+        ]
+        resized_boxes = boxes / scale_mat
+        
+        return resized_image, resized_boxes
+
 def adjust_gamma(image, gamma=1.0):
     # build a lookup table mapping the pixel values [0, 255] to
     # their adjusted gamma values

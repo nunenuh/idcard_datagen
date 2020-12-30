@@ -8,7 +8,24 @@ from . import functional as F
 from . import effects as E
 from ..ops import math_ops, image_ops, boxes_ops
 
+
+class Compose(object):
+    def __init__(self, transforms):
+        self.transforms = transforms
+
+    def __call__(self, img):
+        for t in self.transforms:
+            img = t(img)
+        return img
     
+class ComposeMulti(object):
+    def __init__(self, transforms):
+        self.transforms = transforms
+
+    def __call__(self, img, boxes):
+        for t in self.transforms:
+            img = t(img, boxes)
+        return img
     
 class RandomGamma(object):
     def __init__(self, gamma_range=(1.0, 2.0), 
@@ -268,18 +285,13 @@ class ResizeImageBoxes(object):
         self.interpolation = interpolation
 
     def __call__(self, image, boxes):
-        resized_image = cv.resize(image, self.size, interpolation=self.interpolation)
-
-        oH, oW = image.shape[:2]
-        rH, rW = resized_image.shape[:2]
-        scf_x, scf_y = oW / rW, oH / rH
-        scale_mat = [
-            scf_x, scf_y, scf_x, scf_y,
-            scf_x, scf_y, scf_x, scf_y
-        ]
-        resized_boxes = boxes / scale_mat
-
-        return resized_image, resized_boxes
+        rimage, rboxes = F.resize_image_boxes(
+            image, 
+            boxes, 
+            self.size, 
+            self.interpolation
+        )
+        return rimage, rboxes
 
 
 class RandomRotation(object):
