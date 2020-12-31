@@ -18,14 +18,36 @@ class Compose(object):
             img = t(img)
         return img
     
+class ComposeRandomChoice(Compose):
+    def __init__(self, transforms, k=1):
+        super(ComposeRandomChoice, self).__init__(transforms)
+        self.k = k 
+    
+    def __call__(self, img):
+        self.transforms = random.sample(self.transforms, k=self.k)
+        for t in self.transforms:
+                img = t(img)
+        return img
+    
 class ComposeMulti(object):
     def __init__(self, transforms):
         self.transforms = transforms
 
     def __call__(self, img, boxes):
         for t in self.transforms:
-            img = t(img, boxes)
-        return img
+            img, boxes = t(img, boxes)
+        return img, boxes
+    
+class ComposeMultiRandomChoice(ComposeMulti):
+    def __init__(self, transforms, k=1):
+        super(ComposeRandomChoice, self).__init__(transforms)
+        self.k = k 
+    
+    def __call__(self, img, boxes):
+        self.transforms = random.sample(self.transforms, k=self.k)
+        for t in self.transforms:
+            img, boxes = t(img, boxes)
+        return img, boxes
     
 class RandomGamma(object):
     def __init__(self, gamma_range=(1.0, 2.0), 
