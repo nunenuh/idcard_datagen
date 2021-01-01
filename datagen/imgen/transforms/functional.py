@@ -207,14 +207,17 @@ def hue_shifting(image, shift=16):
     return shift_img
 
 def channel_shuffle(image):
-    if len(image.shape)==4:
+    if len(image.shape[-1])==4:
+        print('Image Shape : ',len(image.shape))
         b,g,r,a = cv.split(image)
         chan = [b,g,r]
         random.shuffle(chan)
         chan.append(a)
         rand_chan_image = cv.merge(chan)
-    elif len(image.shape)==3:
-        b,g,r = cv.split(image)
+    elif len(image.shape[-1])==3:
+        print('Image Shape : ',len(image.shape))
+        splitted_image = cv.split(image)
+        b,g,r  = splitted_image
         chan = [b,g,r]
         random.shuffle(chan)
         rand_chan_image = cv.merge(chan)

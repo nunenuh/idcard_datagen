@@ -30,7 +30,7 @@ def image_selection(img: np.ndarray, val: int = 0):
 
 def create_canvas(size, fcall=np.zeros, dtype=None):
     if dtype:
-        canvas = fcall(size, dtype)
+        canvas = fcall(size).astype(dtype)
     else:
         canvas = fcall(size)
     return canvas

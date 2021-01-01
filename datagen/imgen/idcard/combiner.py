@@ -52,7 +52,6 @@ def combine(bg_path, idcard_path, dst_path,
             bg_img = cv.imread(str(bgfile), cv.IMREAD_COLOR)
             json_data = open_json_file(jsfile)
             
-            
             if bg_size != None:
                 bg_img =cv.resize(bg_img, bg_size, interpolation=cv.INTER_LINEAR)
 
@@ -93,10 +92,7 @@ def combine(bg_path, idcard_path, dst_path,
             image_fpath = base_path.joinpath(f'{rnum}_image.jpg')
             mask_fpath = base_path.joinpath(f'{rnum}_mask.jpg')
             json_fpath = base_path.joinpath(f'{rnum}_json.json')
-
-            cv.imwrite(str(image_fpath), cmp_img)
-            cv.imwrite(str(mask_fpath), seg_img)
-
+            
             json_dict = {
                 'image': {'filename': str(image_fpath.name), 'dim': cmp_img.shape},
                 'mask': {'filename': str(mask_fpath.name), 'dim': seg_img.shape},
@@ -106,6 +102,9 @@ def combine(bg_path, idcard_path, dst_path,
                 'box': main_boxes,
                 'objects': objects,
             }
+            
+            cv.imwrite(str(image_fpath), cmp_img)
+            cv.imwrite(str(mask_fpath), seg_img)
             fop.save_json_file(str(json_fpath), json_dict)
             c = c + 1
                 
