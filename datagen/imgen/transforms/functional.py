@@ -1,6 +1,7 @@
 import numpy as np
 import cv2 as cv
 import random
+from numpy.core.fromnumeric import resize
 
 from skimage import data, exposure, filters
 
@@ -101,7 +102,7 @@ def rotate_boxes(corners, angle, cx, cy, h, w):
     return calculated
 
 
-def shear_image_boxes(image, boxes, shear_factor):
+def shear_image_boxes(image, mwboxes, cboxes, shear_factor):
     h, w = image.shape[:2]
     nW = w + abs(shear_factor * h)
     nH = h + abs(shear_factor * w)
@@ -117,12 +118,18 @@ def shear_image_boxes(image, boxes, shear_factor):
         scale_factor_x, 1, scale_factor_x, 1,
         scale_factor_x, 1, scale_factor_x, 1
     ]
-    boxes = boxes / scale_mat
+    sheared_mwboxes = mwboxes / scale_mat
     
-    return image, boxes
+    cboxes_list = []
+    for cb in cboxes:
+        cb = cb / scale_mat
+        cboxes_list.append(cb)
+    sheared_cboxes = cboxes_list
+    
+    return image, sheared_mwboxes, sheared_cboxes
 
 
-def resize_image_boxes(image, boxes, size, interpolation=cv.INTER_LINEAR):
+def resize_image_boxes(image, mwboxes, cboxes, size, interpolation=cv.INTER_LINEAR):
         resized_image = cv.resize(image, size, interpolation=interpolation)
 
         oH, oW = image.shape[:2]
@@ -132,9 +139,15 @@ def resize_image_boxes(image, boxes, size, interpolation=cv.INTER_LINEAR):
             scf_x, scf_y, scf_x, scf_y,
             scf_x, scf_y, scf_x, scf_y
         ]
-        resized_boxes = boxes / scale_mat
+        resized_mwboxes = mwboxes / scale_mat
         
-        return resized_image, resized_boxes
+        cboxes_list = []
+        for cb in cboxes:
+            cb = cb / scale_mat
+            cboxes_list.append(cb)
+        resized_cboxes = cboxes_list
+        
+        return resized_image, resized_mwboxes, resized_cboxes
 
 def adjust_gamma(image, gamma=1.0):
     # build a lookup table mapping the pixel values [0, 255] to
@@ -227,6 +240,13 @@ def channel_shuffle(image):
     
     return rand_chan_image
 
-
+def to_lo_res(image, factor=0.5, interpolation=cv.INTER_LINEAR):
+    (h, w) = image.shape[:2]
+    hn, wn = int(h*factor), int(w*factor) 
+    image = cv.resize(image, (wn, hn), interpolation=interpolation)
+    image = cv.resize(image, (w, h), interpolation=interpolation)
+    return image
+    
+    
 
 

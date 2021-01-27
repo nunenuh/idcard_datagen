@@ -57,30 +57,52 @@ def combine(bg_path, idcard_path, dst_path,
 
             # reformat json data
             data_record  = content_utils.reformat_json_data(json_data)
-            boxes, cnames, scnames, texts, labels, sequence, genseq = data_record
+            mwboxes, cnames, scnames, texts, labels, sequence, genseq, cboxes, clist = data_record
+            
             
             #prepare for augment
-            boxes = boxes.reshape(-1, 8)
+            mwboxes = mwboxes.reshape(-1, 8)
+            cboxes_list = []
+            for cbox in cboxes:
+                cbox = cbox.reshape(-1, 8)
+                cboxes_list.append(cbox)
+            cboxes = cboxes_list
+            
+            
             ratio = random.choice(scale_ratio)
             augment = transforms.AugmentGenerator(scale_ratio=ratio, angle=angle, shear_factor=shear)
-            seg_img, cmp_img, boxes = augment(bg_img, id_img, boxes)
+            seg_img, cmp_img, mwboxes, cboxes = augment(bg_img, id_img, mwboxes, cboxes)
             seg_img = (seg_img * 255).astype(np.uint8)
+            
+
 
             #prepare for creating child_boxes
-            main_boxes = boxes[0].copy()
+            main_boxes = mwboxes[0].copy()
             main_boxes = boxes_ops.order_points(main_boxes).tolist()
-            child_boxes = boxes[1:len(boxes)].copy()
-            child_boxes = boxes_ops.order_points_batch(child_boxes).tolist()
+            word_boxes = mwboxes[1:len(mwboxes)].copy()
+            word_boxes = boxes_ops.order_points_batch(word_boxes).tolist()
             
+            
+            chardata_list = []
+            for (cbox, clist) in zip(cboxes, clist):
+                cbox = boxes_ops.order_points_batch(cbox).tolist()
+                cdata_list = []
+                for (cb, cl) in zip(cbox, clist):
+                    cdict = OrderedDict({"char": cl, "points": cb})
+                    cdata_list.append(cdict)
+                    
+                chardata_list.append(cdata_list)
+                
             #build and append every text
             objects = []
-            zipped_iter = [child_boxes, cnames, scnames, texts, labels, sequence, genseq]
-            for (cbox, cn, scn, txt, lbl, seq, gs) in zip(*zipped_iter):
+            zipped_iter = [word_boxes, chardata_list, cnames, scnames, texts, labels, sequence, genseq]
+            for (wbox, cdata, cn, scn, txt, lbl, seq, gs) in zip(*zipped_iter):
                 dt = OrderedDict({
                     'text': txt, 
-                    'points': cbox,
+                    'points': wbox,
                     'classname': data_config.classname_list[cn],
                     'subclass': data_config.subclassname_list[scn],
+                    'chardata': cdata,
                     'label': lbl,
                     'sequence': seq,
                     'genseq': gs,

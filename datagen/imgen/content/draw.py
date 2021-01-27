@@ -5,6 +5,7 @@ import numpy as np
 # from . import functions as F
 from ..ops import imtext_ops
 from ..ops import boxes_ops
+import cv2 as cv
 
 
 def text(
@@ -93,12 +94,27 @@ def text_normal(
         xymin, xywh = (x, y), (x, y, txt_w, txt_h)
         points = boxes_ops.xywh_to_point(xywh, use_pad=use_pad, pad_factor=pad_factor)
 
+        char_data = []
+        out_img, charbox_list = char_bbox(np_img, txt, xy_pos=xymin, font_name=font_name, font_size=font_size)
+        for bxt in charbox_list:
+            bbox, char = bxt
+            bpoints = boxes_ops.xywh_to_point(bbox, use_pad=False)
+            
+            char_dict = OrderedDict({"char": char, "points": bpoints.tolist()})
+            char_data.append(char_dict)
+
+
         odt = OrderedDict({"text": txt, "points": points.tolist(),
+                           'chardata': char_data,
                            "classname": classname, 'subclass': subclass,
                            "sequence": idx})
         data.append(odt)
 
         draw.text(xymin, txt, font=font, fill=color)
+        
+            
+
+        
         x = x + txt_w + dlm_w
 
     return np.array(img), data
@@ -158,7 +174,18 @@ def text_center(
         xymin, xywh = (x, y), (x, y, txt_w, txt_h)
         points = boxes_ops.xywh_to_point(xywh, use_pad=use_pad, pad_factor=pad_factor)
 
+        char_data = []
+        out_img, charbox_list = char_bbox(np_img, txt, xy_pos=xymin, font_name=font_name, font_size=font_size)
+        for bxt in charbox_list:
+            bbox, char = bxt
+            bpoints = boxes_ops.xywh_to_point(bbox, use_pad=False)
+            
+            char_dict = OrderedDict({"char": char, "points": bpoints.tolist()})
+            char_data.append(char_dict)
+
+
         odt = OrderedDict({"text": txt, "points": points.tolist(),
+                           'chardata': char_data,
                            "classname": classname, 'subclass': subclass,
                            "sequence": idx})
         data.append(odt)
@@ -167,3 +194,35 @@ def text_center(
         x = x + txt_w + dlm_w
 
     return np.array(img), data
+
+
+def char_bbox(
+    image: np.ndarray, 
+    text: str,  
+    xy_pos: tuple, 
+    font_name: str = "arial", 
+    font_size: int = 14, 
+    img_mode: str = "RGBA",
+    color: tuple = (0,0,0),
+    debug_draw: bool = False
+):
+    np_img = image.copy()
+    
+    data_tuple = []
+    xmin, ymin = xy_pos
+    for i in range(len(text)):
+        img, draw = imtext_ops.get_image_draw(np_img, img_mode=img_mode)
+        font = imtext_ops.get_image_font(font_name=font_name, font_size=font_size)
+        tw, th = font.getsize(text[i])
+        ox, oy = font.getoffset(text[i])
+        xmax, ymax = xmin + tw, ymin + th
+        if debug_draw:
+            draw.text((xmin,ymin), text[i], font=font, fill=color)
+        xminr, yminr = xmin + ox, ymin + oy
+        if debug_draw:
+            np_img = cv.rectangle(np.array(img), (xminr, yminr), (xmax, ymax), (0, 255, 0), 3)
+        bbox = [xminr, yminr, xmax, ymax]
+        xmin = xmax
+        data_tuple.append((bbox, text[i]))
+    
+    return np_img, data_tuple

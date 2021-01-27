@@ -19,6 +19,11 @@ def generate(csv_path, dst_path, image_path, json_path, photo_path):
 
     for idx in bar_range:
         data = dframe.iloc[idx].to_dict()
+        
+        gender = data['gender']
+        photo_data = get_photo_data(gender, photo_path)
+        
+        
         rnd_idx = random.choice([i for i in range(len(photo_data))])
         data['face'] = str(photo_data[rnd_idx])
 
@@ -46,6 +51,15 @@ def generate(csv_path, dst_path, image_path, json_path, photo_path):
         with open(str(json_fpath), 'w') as file:
             json.dump(obj, file, indent=4) 
 
+
+def get_photo_data(gender, photo_path):
+    photo_path = Path(photo_path)
+    if gender == "PEREMPUAN":
+        photo_data = list(photo_path.joinpath('female').glob("*.png"))
+    else:
+        photo_data = list(photo_path.joinpath('male').glob("*.png"))
+    
+    return photo_data
 
 def clean_parameters(csv_path, dst_path, image_path, json_path, photo_path):
     csv_path = Path(csv_path)

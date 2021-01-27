@@ -49,6 +49,51 @@ class ComposeMultiRandomChoice(ComposeMulti):
             img, boxes = t(img, boxes)
         return img, boxes
     
+
+
+class Darken(object):
+    def __init__(self, level=-10, gamma=0.5):
+        self.level = level
+        self.gamma = gamma
+        
+    def __call__(self, image):
+        img_lo_ct = F.adjust_contrast(image, self.level)
+        img_lo_br = F.adjust_brightness(img_lo_ct, self.level)
+        img_lo_gm = F.adjust_gamma(img_lo_br, gamma=self.gamma)
+        
+        return img_lo_gm
+    
+class Lighten(object):
+    def __init__(self, level=13, gamma=1.1):
+        self.level = level
+        self.gamma = gamma
+    
+    def __call__(self, image):
+        img_hi_ct = F.adjust_contrast(image, self.level)
+        img_hi_br = F.adjust_brightness(img_hi_ct, self.level)
+        img_hi_gm = F.adjust_gamma(img_hi_br, gamma=self.gamma)
+        
+        return img_hi_gm
+    
+    
+class ToLoRes(object):
+    def __init__(self, factor=0.5):
+        self.factor = factor
+    
+    def __call__(self, image):
+        image = F.to_lo_res(image, factor=self.factor)
+        return image
+    
+class RandomLoRes(object):
+    def __init__(self, factor_range=(0.4,0.6)):
+        self.factor_range = factor_range
+        
+    def __call__(self, image):
+        self.factor = random.uniform(*self.factor_range)
+        image = F.to_lo_res(image, factor=self.factor)
+        return image
+        
+
 class RandomGamma(object):
     def __init__(self, gamma_range=(1.0, 2.0), 
                  randomize=True, p=0.5):
@@ -266,7 +311,10 @@ class RandomAddSpeed(object):
         
     def __call__(self, image):
         if self.randomize and F.coin_toss(p=self.rand_prob):
-            image = E.add_speed(image)
+            try:
+                image = E.add_speed(image)
+            except:
+                pass
         return image  
 
 class RandomAddGravel(object):
@@ -332,7 +380,7 @@ class RandomRotation(object):
             else:
                 self.angle = (-self.angle, self.angle)
 
-    def __call__(self, image: np.ndarray, boxes: np.ndarray) -> Tuple[Any, Any]:
+    def __call__(self, image: np.ndarray, mwboxes: np.ndarray, cboxes:List[np.ndarray] ) -> Tuple[Any, Any]:
         if self.randomize:
             if F.coin_toss(p=self.rand_prob):
                 angle = random.uniform(*self.angle)
@@ -345,7 +393,8 @@ class RandomRotation(object):
         cx, cy = w // 2, h // 2
 
         rotated_image = F.rotate_image(image, angle)
-        rotated_boxes = F.rotate_boxes(boxes, angle, cx, cy, h, w)
+        rotated_mwboxes = F.rotate_boxes(mwboxes, angle, cx, cy, h, w)
+        
         resized_image = cv.resize(rotated_image, (w, h), interpolation=cv.INTER_LINEAR)
 
         scale_factor_x = rotated_image.shape[1] / w
@@ -354,9 +403,17 @@ class RandomRotation(object):
             scale_factor_x, scale_factor_y, scale_factor_x, scale_factor_y,
             scale_factor_x, scale_factor_y, scale_factor_x, scale_factor_y,
         ]
-        resized_boxes = rotated_boxes / scaled_mat
+        resized_mwboxes = rotated_mwboxes / scaled_mat
+        
+        cboxes_list = []
+        for cb in cboxes:
+            if len(cb)>0:
+                cb = F.rotate_boxes(cb, angle, cx, cy, h, w)
+                cb = cb / scaled_mat
+                cboxes_list.append(cb)
+        resized_cboxes = cboxes_list
 
-        return resized_image, resized_boxes, angle
+        return resized_image, resized_mwboxes, resized_cboxes, angle
 
 
 class RandomShear(object):
@@ -370,7 +427,7 @@ class RandomShear(object):
             else:
                 self.shear_factor = (-self.shear_factor, self.shear_factor)
 
-    def __call__(self, image, boxes):
+    def __call__(self, image, mwboxes, cboxes):
         if self.randomize:
             if F.coin_toss(p=self.rand_prob):
                 shear_factor = random.uniform(*self.shear_factor)
@@ -379,9 +436,9 @@ class RandomShear(object):
         else:
             shear_factor = self.shear_factor
             
-        image, boxes = F.shear_image_boxes(image, boxes, shear_factor)
+        image, mwboxes, cboxes = F.shear_image_boxes(image, mwboxes, cboxes, shear_factor)
 
-        return image, boxes, shear_factor
+        return image, mwboxes, cboxes, shear_factor
 
 
 class RandomRotateAndShear(object):
@@ -404,25 +461,28 @@ class RandomRotateAndShear(object):
                                     rand_prob=self.rand_prob)
 
 
-    def __call__(self, image, boxes):
-        rimage, rboxes, angle = self.rotate_fn(image, boxes)
-        simage, sboxes, factor = self.shear_fn(rimage, rboxes)
+    def __call__(self, image, mwboxes, cboxes):
+        rimage, rmwboxes, rcboxes, angle = self.rotate_fn(image, mwboxes, cboxes)
+        simage, smwboxes, scboxes, factor = self.shear_fn(rimage, rmwboxes, rcboxes)
 
         self.rotation_angle = angle
         self.shear_factor = factor
 
-        return simage, sboxes
+        return simage, smwboxes, scboxes
 
 
 
 class AugmentGenerator(object):
-    def __init__(self, scale_ratio=0.25, angle=45, shear_factor=0.3, 
+    def __init__(self, scale_ratio=0.25, angle=45, shear_factor=0.3,
+                 use_basic_effect=True, use_adv_effect=True,
                  randomize=True, rand_prob=0.5):
         self.scale_ratio = scale_ratio
         self.angle = angle
         self.shear_factor = shear_factor
         self.randomize = randomize
         self.rand_prob = rand_prob
+        self.use_basic_effect = use_basic_effect
+        self.use_adv_effect = use_adv_effect
         
         self._init_objects_call_fn()
         
@@ -433,20 +493,36 @@ class AugmentGenerator(object):
             rand_prob=self.rand_prob
         )
         
-        
-        self.basic_effect_fn = ComposeRandomChoice([
+        self.light_effect_fn =  ComposeRandomChoice([
             RandomGamma(gamma_range=(0.5, 2.5), p=0.5),
             RandomContrast(level_range=(0, 20), p=0.5),
             RandomBrightness(level_range=(20, 50), p=0.5),
-            # RandomHueShifting(shift_range=(1, 100), p=0.5),
-            # RandomChannelShuffle(p=0.5),
-            RandomSharpen(p=0.5),
+        ])
+        
+        self.color_effect_fn = ComposeRandomChoice([
+            RandomHueShifting(shift_range=(1, 100), p=0.5),
+            RandomChannelShuffle(p=0.5),
+        ])
+        
+        self.blur_effect_fn = ComposeRandomChoice([
             RandomGaussionBlur(sigma_range=(1.0, 5.0), p=0.5),
             RandomMedianBlur(p=0.5),
+        ])
+        
+        self.morph_effect_fn = ComposeRandomChoice([
             RandomMorphDilation(p=0.5),
             # RandomMorphOpening(p=0.5),
-            # RandomMorphClosing(p=0.5)
-        ], k=5)
+            RandomMorphClosing(p=0.5)
+        ])
+        
+        self.basic_effect_fn = ComposeRandomChoice([
+            self.light_effect_fn,
+            # self.color_effect_fn,
+            self.blur_effect_fn,
+            self.morph_effect_fn
+        ], k=1)
+        
+        
         
         self.advance_effect_fn = ComposeRandomChoice([
             RandomAddSunFlares(p=0.5),
@@ -459,10 +535,10 @@ class AugmentGenerator(object):
         ], k=1)
 
 
-    def __call__(self, background_image, foreground_image, boxes: np.ndarray = None):
+    def __call__(self, background_image, foreground_image, mwboxes: np.ndarray = None, cboxes:List[np.ndarray] = None):
         # boxes = F.corner_from_shape(foreground_image)
        
-        foreground_image, boxes = self.random_rotate_shear_fn(foreground_image, boxes)
+        foreground_image, mwboxes, cboxes = self.random_rotate_shear_fn(foreground_image, mwboxes, cboxes)
         self.actual_angle = self.random_rotate_shear_fn.rotation_angle
         self.actual_shear = self.random_rotate_shear_fn.shear_factor
 
@@ -474,25 +550,38 @@ class AugmentGenerator(object):
         # frgd_base_image = cv.resize(foreground_image, dsize=(nfgdW, nfgdH), interpolation=cv.INTER_LINEAR)
         # resize_image_boxes = ResizeImageBoxes(size=(nfgdW, nfgdH))
         
-        frgd_base_image, boxes = F.resize_image_boxes(foreground_image, boxes, size=(nfgdW, nfgdH))
+        frgd_base_image, mwboxes, cboxes = F.resize_image_boxes(foreground_image, mwboxes, cboxes,  size=(nfgdW, nfgdH))
         frgd_segment_image = cv.split(frgd_base_image)[-1]
         frgd_segment_image = (frgd_segment_image > 0).astype(np.uint8)
         
         segment_canvas = image_ops.create_canvas(back_size,  dtype=np.uint8)
         segment_image = image_ops.join2image_withcoords(frgd_segment_image, segment_canvas, xybox)
 
-        frgd_base_image = self.basic_effect_fn(frgd_base_image)
+        if self.use_basic_effect:
+            frgd_base_image = self.basic_effect_fn(frgd_base_image)
+            
         overlay_canvas = image_ops.create_canvas((bgH, bgW, 4), dtype=np.uint8)
         overlay_image = image_ops.join2image_withcoords(frgd_base_image, overlay_canvas, xybox)
         
         composite_image = image_ops.composite2image(background_image, overlay_image)
         composite_image = composite_image.astype(np.uint8)
-        composite_image = self.advance_effect_fn(composite_image) 
+        
+        if self.use_adv_effect:
+            composite_image = self.advance_effect_fn(composite_image) 
 
-        boxes = boxes_ops.boxes_reorder(boxes)
-        boxes = boxes + [xmin, ymin]
+        mwboxes = boxes_ops.boxes_reorder(mwboxes)
+        mwboxes = mwboxes + [xmin, ymin]
+        
+        cboxes_list = []
+        for cb in cboxes:
+            cb = boxes_ops.boxes_reorder(cb)
+            cb = cb + [xmin, ymin]
+            cboxes_list.append(cb)
+        cboxes = cboxes_list
+        
+        
 
-        return segment_image, composite_image, boxes,
+        return segment_image, composite_image, mwboxes, cboxes
 
 
 if __name__ == "__main__":

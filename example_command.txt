@@ -20,7 +20,7 @@ python combiner_idcard.py --bg_path data/background --bg_size "1280x960" \
 
 python combiner_idcard.py --bg_path data/background --bg_size "1000x750" \
 --idcard_path /data/idcard/base --dst_path /data/idcard/combined \
---angle 15 --scale_ratio "0.85, 1.0" --shear 0.2 \
+--angle 30 --scale_ratio "0.3, 1.0" --shear 0.2 \
 --num_generated 1
 
 python combiner_idcard.py --bg_path data/background --bg_size "1000x750" \

@@ -42,20 +42,37 @@ def reformat_json_data(data_dict: dict):
     box_pts = data_dict.get('points')
     boxes.append(box_pts)
     objects: list = data_dict.get('objects')
+    cboxes, clist = [], []
     for obj in objects:
         # print(obj.get('classname'), obj.get('text'))
         pts = obj.get('points')
         boxes.append(pts)
+        
+        cchar, cbox = [], []
+        char_data = obj.get('chardata',None)
+        # if char_data != None:
+        for obj_char in char_data:
+            char_pts = obj_char.get('points')
+            char_letter = obj_char.get('char')
+            
+            cbox.append(char_pts)
+            cchar.append(char_letter)
+            
+        cboxes.append(np.array(cbox))
+        clist.append(cchar)
+        
+            
 
     cnames, scnames, texts, labels, sequence, genseq = create_class_number(data_dict)
 
-    return np.array(boxes), cnames, scnames, texts, labels, sequence, genseq 
+    return np.array(boxes), cnames, scnames, texts, labels, sequence, genseq, cboxes, clist
 
 
 def create_class_number(data_dict: dict):
     objects = data_dict.get('objects').copy()
     csname, scname, sequence, text, label, genseq = [], [], [], [], [], []
-
+    char_data = []
+    
     for obj in objects:
         cn = obj.get('classname')
         scn = obj.get('subclass')
@@ -63,11 +80,14 @@ def create_class_number(data_dict: dict):
         txt = obj.get("text")
         lbl = obj.get('label')
         gs = obj.get('genseq')
+        cdata = obj.get('chardata')
+        
         csname.append(data_config.classname[cn])
         scname.append(data_config.subclassname[scn])
         sequence.append(seq)
         label.append(lbl)
         text.append(txt)
         genseq.append(gs)
+        char_data.append(cdata)
 
     return csname, scname, text, label, sequence, genseq 

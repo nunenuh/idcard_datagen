@@ -207,7 +207,7 @@ def shadow_process(image,no_of_shadows,x1,y1,x2,y2, shadow_dimension):
     image_RGB = cv.cvtColor(image_HLS,cv.COLOR_HLS2RGB) ## Conversion to RGB
     return image_RGB
 
-def add_shadow(image, no_of_shadows=1, rectangular_roi=(-1,-1,-1,-1), shadow_dimension=5):## ROI:(top-left x1,y1, bottom-right x2,y2), shadow_dimension=no. of sides of polygon generated
+def add_shadow(image, no_of_shadows=3, rectangular_roi=(-1,-1,-1,-1), shadow_dimension=5):## ROI:(top-left x1,y1, bottom-right x2,y2), shadow_dimension=no. of sides of polygon generated
     verify_image(image)
     if not(is_numeric(no_of_shadows) and no_of_shadows>=1 and no_of_shadows<=10):
         raise Exception(err_shadow_count)
@@ -270,7 +270,7 @@ def add_sun_flare_line(flare_center,angle,imshape):
         y.append(2*flare_center[1]-rand_y)
     return x,y
 
-def add_sun_process(image, no_of_flare_circles,flare_center,src_radius,x,y,src_color):
+def add_sun_process(image, no_of_flare_circles, flare_center, src_radius,x,y,src_color):
     overlay= image.copy()
     output= image.copy()
     imshape=image.shape
@@ -283,7 +283,7 @@ def add_sun_process(image, no_of_flare_circles,flare_center,src_radius,x,y,src_c
     output= flare_source(output,(int(flare_center[0]),int(flare_center[1])),src_radius,src_color)
     return output
 
-def add_sun_flare(image, flare_center=-1, angle=-1, no_of_flare_circles=8, src_radius=400, src_color=(255,255,255)):
+def add_sun_flare(image, flare_center=-1, angle=-1, no_of_flare_circles=12, src_radius=150, src_color=(255,255,255)):
 #     verify_image(image)
     if(angle!=-1):
         angle=angle%(2*math.pi)
@@ -340,7 +340,7 @@ def snow_process(image,snow_coeff):
     image_RGB = cv.cvtColor(image_HLS,cv.COLOR_HLS2RGB) ## Conversion to RGB
     return image_RGB
 
-def add_snow(image, snow_coeff=-1):
+def add_snow(image, snow_coeff=0.2):
     verify_image(image)
     if(snow_coeff!=-1):
         if(snow_coeff<0.0 or snow_coeff>1.0):
@@ -457,7 +457,7 @@ def generate_random_blur_coordinates(imshape,hw):
         index+=1
     return blur_points
 
-def add_fog(image, fog_coeff=-1):
+def add_fog(image, fog_coeff=0.15):
     verify_image(image)
 
     if(fog_coeff!=-1):
@@ -542,12 +542,12 @@ def add_gravel(image,rectangular_roi=(-1,-1,-1,-1), no_of_patches=8):
     if rectangular_roi==(-1,-1,-1,-1):
         if(is_numpy_array(image)):
             x1=0
-            y1=int(image.shape[0]*3/4)
+            y1=int(image.shape[0]*2/4)
             x2=image.shape[1]
             y2=image.shape[0]
         else:
             x1=0
-            y1=int(image[0].shape[0]*3/4)
+            y1=int(image[0].shape[0]*2/4)
             x2=image[0].shape[1]
             y2=image[0].shape[0]
     elif x1==-1 or y1==-1 or x2==-1 or y2==-1 or x2<=x1 or y2<=y1:
@@ -582,7 +582,7 @@ def apply_motion_blur(image,count):
     image_RGB=image_t
     return image_RGB
 
-def add_speed(image, speed_coeff=-1):
+def add_speed(image, speed_coeff=0.05):
     verify_image(image)
     if(speed_coeff !=-1):
         if(speed_coeff<0.0 or speed_coeff>1.0):
