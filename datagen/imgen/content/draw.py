@@ -177,10 +177,10 @@ def text_center(
         char_data = []
         out_img, charbox_list = char_bbox(np_img, txt, xy_pos=xymin, font_name=font_name, font_size=font_size)
         for bxt in charbox_list:
-            bbox, char = bxt
-            bpoints = boxes_ops.xywh_to_point(bbox, use_pad=False)
+            cpoints, char = bxt
+            # bpoints = boxes_ops.xywh_to_point(bbox, use_pad=False)
             
-            char_dict = OrderedDict({"char": char, "points": bpoints.tolist()})
+            char_dict = OrderedDict({"char": char, "points": cpoints.tolist()})
             char_data.append(char_dict)
 
 
@@ -216,13 +216,15 @@ def char_bbox(
         tw, th = font.getsize(text[i])
         ox, oy = font.getoffset(text[i])
         xmax, ymax = xmin + tw, ymin + th
-        if debug_draw:
+        if debug_draw:  
             draw.text((xmin,ymin), text[i], font=font, fill=color)
         xminr, yminr = xmin + ox, ymin + oy
         if debug_draw:
             np_img = cv.rectangle(np.array(img), (xminr, yminr), (xmax, ymax), (0, 255, 0), 3)
-        bbox = [xminr, yminr, xmax, ymax]
+        xymm = [xminr, yminr, xmax, ymax]
+        xywh = boxes_ops.to_xywh(xymm)
+        points = boxes_ops.xywh_to_point(xywh, use_pad=False)
         xmin = xmax
-        data_tuple.append((bbox, text[i]))
+        data_tuple.append((points, text[i]))
     
     return np_img, data_tuple
