@@ -84,6 +84,11 @@ def text_normal(
 
     data = []
     text_split = text.split(" ")
+    cleaned_text = []
+    for txt in text_split:
+        cleaned_text.append(txt.strip())
+    text_split = cleaned_text
+    
     for idx, txt in enumerate(text_split):
         # you need to add space for every text
         txt_w, txt_h = imtext_ops.find_textsize(
@@ -167,6 +172,11 @@ def text_center(
 
     data = []
     text_split = text.split(" ")
+    cleaned_text = []
+    for txt in text_split:
+        cleaned_text.append(txt.strip())
+    text_split = cleaned_text
+    
     for idx, txt in enumerate(text_split):
         # you need to add space for every text
         txt_w, txt_h = imtext_ops.find_textsize(
