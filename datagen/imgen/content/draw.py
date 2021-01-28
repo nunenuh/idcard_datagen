@@ -86,7 +86,9 @@ def text_normal(
     text_split = text.split(" ")
     cleaned_text = []
     for txt in text_split:
-        cleaned_text.append(txt.strip())
+        txt = txt.strip()
+        if len(txt)>0:
+            cleaned_text.append()
     text_split = cleaned_text
     
     for idx, txt in enumerate(text_split):
@@ -174,7 +176,9 @@ def text_center(
     text_split = text.split(" ")
     cleaned_text = []
     for txt in text_split:
-        cleaned_text.append(txt.strip())
+        txt = txt.strip()
+        if len(txt)>0:
+            cleaned_text.append()
     text_split = cleaned_text
     
     for idx, txt in enumerate(text_split):
@@ -221,7 +225,7 @@ def char_bbox(
     data_tuple = []
     xmin, ymin = xy_pos
     for i in range(len(text)):
-        if text[i]!="":
+        if len(text[i])>0:
             img, draw = imtext_ops.get_image_draw(np_img, img_mode=img_mode)
             font = imtext_ops.get_image_font(font_name=font_name, font_size=font_size)
             tw, th = font.getsize(text[i])
