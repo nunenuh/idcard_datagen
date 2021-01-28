@@ -101,7 +101,7 @@ def text_normal(
             # bpoints = boxes_ops.xywh_to_point(bbox, use_pad=False)
             
             char_dict = OrderedDict({"char": char, "points": cpoints.tolist()})
-            char_data.append(char_dict)
+            char_data.append(char_dict) 
 
 
         odt = OrderedDict({"text": txt, "points": points.tolist(),
@@ -211,20 +211,21 @@ def char_bbox(
     data_tuple = []
     xmin, ymin = xy_pos
     for i in range(len(text)):
-        img, draw = imtext_ops.get_image_draw(np_img, img_mode=img_mode)
-        font = imtext_ops.get_image_font(font_name=font_name, font_size=font_size)
-        tw, th = font.getsize(text[i])
-        ox, oy = font.getoffset(text[i])
-        xmax, ymax = xmin + tw, ymin + th
-        if debug_draw:  
-            draw.text((xmin,ymin), text[i], font=font, fill=color)
-        xminr, yminr = xmin + ox, ymin + oy
-        if debug_draw:
-            np_img = cv.rectangle(np.array(img), (xminr, yminr), (xmax, ymax), (0, 255, 0), 3)
-        xymm = [xminr, yminr, xmax, ymax]
-        xywh = boxes_ops.xymm2xywh(xymm)
-        points = boxes_ops.xywh_to_point(xywh, use_pad=False)
-        xmin = xmax
-        data_tuple.append((points, text[i]))
+        if text[i]!="":
+            img, draw = imtext_ops.get_image_draw(np_img, img_mode=img_mode)
+            font = imtext_ops.get_image_font(font_name=font_name, font_size=font_size)
+            tw, th = font.getsize(text[i])
+            ox, oy = font.getoffset(text[i])
+            xmax, ymax = xmin + tw, ymin + th
+            if debug_draw:  
+                draw.text((xmin,ymin), text[i], font=font, fill=color)
+            xminr, yminr = xmin + ox, ymin + oy
+            if debug_draw:
+                np_img = cv.rectangle(np.array(img), (xminr, yminr), (xmax, ymax), (0, 255, 0), 3)
+            xymm = [xminr, yminr, xmax, ymax]
+            xywh = boxes_ops.xymm2xywh(xymm)
+            points = boxes_ops.xywh_to_point(xywh, use_pad=False)
+            xmin = xmax
+            data_tuple.append((points, text[i]))
     
     return np_img, data_tuple
