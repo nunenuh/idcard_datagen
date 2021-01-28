@@ -88,7 +88,7 @@ def text_normal(
     for txt in text_split:
         txt = txt.strip()
         if len(txt)>0:
-            cleaned_text.append()
+            cleaned_text.append(txt)
     text_split = cleaned_text
     
     for idx, txt in enumerate(text_split):
@@ -178,7 +178,7 @@ def text_center(
     for txt in text_split:
         txt = txt.strip()
         if len(txt)>0:
-            cleaned_text.append()
+            cleaned_text.append(txt)
     text_split = cleaned_text
     
     for idx, txt in enumerate(text_split):
