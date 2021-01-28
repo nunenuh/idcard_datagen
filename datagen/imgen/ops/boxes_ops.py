@@ -88,6 +88,10 @@ def to_xywh(box):
     xmin, ymin, xmax, ymax = to_xyminmax(box)
     return xmin, ymin, xmax - xmin, ymax - ymin
 
+def xymm2xywh(xymm):
+    xmin, ymin, xmax, ymax = xymm
+    return xmin, ymin, xmax - xmin, ymax - ymin
+
 def corner_from_shape(image: np.ndarray):
     h, w = image.shape[:2]
     box = [0, 0, w, h]
