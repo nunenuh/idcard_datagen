@@ -97,10 +97,10 @@ def text_normal(
         char_data = []
         out_img, charbox_list = char_bbox(np_img, txt, xy_pos=xymin, font_name=font_name, font_size=font_size)
         for bxt in charbox_list:
-            bbox, char = bxt
-            bpoints = boxes_ops.xywh_to_point(bbox, use_pad=False)
+            cpoints, char = bxt
+            # bpoints = boxes_ops.xywh_to_point(bbox, use_pad=False)
             
-            char_dict = OrderedDict({"char": char, "points": bpoints.tolist()})
+            char_dict = OrderedDict({"char": char, "points": cpoints.tolist()})
             char_data.append(char_dict)
 
 
