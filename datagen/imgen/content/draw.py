@@ -222,7 +222,7 @@ def char_bbox(
         if debug_draw:
             np_img = cv.rectangle(np.array(img), (xminr, yminr), (xmax, ymax), (0, 255, 0), 3)
         xymm = [xminr, yminr, xmax, ymax]
-        xywh = boxes_ops.to_xywh(xymm)
+        xywh = boxes_ops.xymm2xywh(xymm)
         points = boxes_ops.xywh_to_point(xywh, use_pad=False)
         xmin = xmax
         data_tuple.append((points, text[i]))
