@@ -49,7 +49,7 @@ def reformat_json_data(data_dict: dict):
         boxes.append(pts)
         
         cchar, cbox = [], []
-        char_data = obj.get('chardata',None)
+        char_data = obj.get('chardata')
         # if char_data != None:
         for obj_char in char_data:
             char_pts = obj_char.get('points')
@@ -63,7 +63,7 @@ def reformat_json_data(data_dict: dict):
         
             
 
-    cnames, scnames, texts, labels, sequence, genseq = create_class_number(data_dict)
+    cnames, scnames, texts, labels, sequence, genseq, char_data = create_class_number(data_dict)
 
     return np.array(boxes), cnames, scnames, texts, labels, sequence, genseq, cboxes, clist
 
@@ -90,4 +90,4 @@ def create_class_number(data_dict: dict):
         genseq.append(gs)
         char_data.append(cdata)
 
-    return csname, scname, text, label, sequence, genseq 
+    return csname, scname, text, label, sequence, genseq, char_data
