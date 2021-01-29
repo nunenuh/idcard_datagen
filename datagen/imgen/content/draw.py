@@ -119,9 +119,6 @@ def text_normal(
 
         draw.text(xymin, txt, font=font, fill=color)
         
-            
-
-        
         x = x + txt_w + dlm_w
 
     return np.array(img), data
