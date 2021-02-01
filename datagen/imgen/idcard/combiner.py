@@ -53,7 +53,15 @@ def combine(bg_path, idcard_path, dst_path,
             json_data = open_json_file(jsfile)
             
             if bg_size != None:
-                bg_img =cv.resize(bg_img, bg_size, interpolation=cv.INTER_LINEAR)
+                bsw, bsh = bg_size
+                bgh, bgw = bg_img.shape[:2]
+                if bgh>bgw: # potrait
+                    bg_size = (bsh, bsw)
+                if bgw>=bgh: #landscape
+                    bg_size = (bsw, bsh)
+                
+                bg_img = cv.resize(bg_img, bg_size, interpolation=cv.INTER_LINEAR)
+                
 
             # reformat json data
             data_record  = content_utils.reformat_json_data(json_data)
