@@ -22,6 +22,11 @@ parser.add_argument('--photo_path', type=str, required=True,
                     default='data/face/', 
                     help='source directory for 3x4 photo image')
 
+parser.add_argument('--randomize', type=bool, required=False,
+                    default=False, 
+                    help='randomize text position')
+
+
 args = parser.parse_args()
 
 if __name__ == "__main__":
@@ -32,5 +37,6 @@ if __name__ == "__main__":
         photo_path = args.photo_path,
         image_path = args.image_path,
         json_path = args.json_path,
+        randomize = args.randomize
     )
     
