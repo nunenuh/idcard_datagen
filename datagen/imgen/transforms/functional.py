@@ -171,7 +171,18 @@ def image_scale_abs(image, contrast_level=1.0, brightness_level=1):
     # alpha = 1 # Contrast control (1.0-3.0)
     # beta = 0 # Brightness control (0-100)
     alpha, beta = contrast_level, brightness_level
-    adjusted = cv.convertScaleAbs(image, alpha=alpha, beta=beta)
+    
+    # print(image.shape)
+    if image.shape[-1]==4:
+        # print('Image Shape : ',len(image.shape))
+        b,g,r,a = cv.split(image)
+        bgr = cv.merge([b,g,r])
+        bgr = cv.convertScaleAbs(bgr, alpha=alpha, beta=beta)
+        b,g,r = cv.split(bgr)
+        adjusted = cv.merge([b,g,r,a])
+    else:
+         adjusted = cv.convertScaleAbs(image, alpha=alpha, beta=beta)
+         
     return adjusted
 
 def gaussian_blur(image, sigma=1.6, ksize=(5,5)):
@@ -212,23 +223,40 @@ def emboss(image):
     return image
 
 def hue_shifting(image, shift=16):
-    hsv = cv.cvtColor(image, cv.COLOR_BGR2HSV)
-    h, s, v = cv.split(hsv)
-    shift_h = (h + shift) % 180
-    shift_hsv = cv.merge([shift_h, s, v])
-    shift_img = cv.cvtColor(shift_hsv, cv.COLOR_HSV2BGR)
+    if image.shape[-1]==4:
+        b, g, r, a = cv.split(image)
+        image_bgr = cv.merge([b,g,r])
+        
+        hsv = cv.cvtColor(image_bgr, cv.COLOR_BGR2HSV)
+        h, s, v = cv.split(hsv)
+        shift_h = (h + shift) % 180
+        shift_hsv = cv.merge([shift_h, s, v])
+        shift_img = cv.cvtColor(shift_hsv, cv.COLOR_HSV2BGR)
+        
+        sb, sg, sr = cv.split(shift_img) 
+        shift_img = cv.merge([sb, sg, sr, a])
+    
+    elif image.shape[-1]==3:
+        hsv = cv.cvtColor(image, cv.COLOR_BGR2HSV)
+        h, s, v = cv.split(hsv)
+        shift_h = (h + shift) % 180
+        shift_hsv = cv.merge([shift_h, s, v])
+        shift_img = cv.cvtColor(shift_hsv, cv.COLOR_HSV2BGR)
+    else:
+        #reject later
+        raise Exception("Image Channel must be more than BGR or BGRA, grayscale is not accepted")
+    
     return shift_img
 
 def channel_shuffle(image):
-    if len(image.shape[-1])==4:
-        print('Image Shape : ',len(image.shape))
+    # print(image.shape)
+    if image.shape[-1]==4:
         b,g,r,a = cv.split(image)
         chan = [b,g,r]
         random.shuffle(chan)
         chan.append(a)
         rand_chan_image = cv.merge(chan)
-    elif len(image.shape[-1])==3:
-        print('Image Shape : ',len(image.shape))
+    elif image.shape[-1]==3:
         splitted_image = cv.split(image)
         b,g,r  = splitted_image
         chan = [b,g,r]
@@ -246,6 +274,65 @@ def to_lo_res(image, factor=0.5, interpolation=cv.INTER_LINEAR):
     image = cv.resize(image, (wn, hn), interpolation=interpolation)
     image = cv.resize(image, (w, h), interpolation=interpolation)
     return image
+
+
+
+def random_erasing(image, area_range=(0.1, 1.0)):
+    img = image.copy()
+        
+    if len(img.shape)>=3:
+        h, w, d = img.shape
+    else:
+        h, w, d = img.shape, 1
+
+    w_occ_max, h_occ_max = int(max(area_range) * w), int(max(area_range) * h)
+    w_occ_min, h_occ_min = int(min(area_range) * w), int(min(area_range) * h)
+
+    w_occ = random.randint(w_occ_min, w_occ_max)
+    h_occ = random.randint(h_occ_min, h_occ_max)
+
+    if d==1:
+        rectangle = np.uint8(np.random.rand(h_occ, w_occ) * 255)
+    else:
+        rectangle = np.uint8(np.random.rand(h_occ, w_occ, d) * 255)
+        
+    rand_x_pos = random.randint(0, w - w_occ)
+    rand_y_pos = random.randint(0, h - h_occ)
+
+    img[rand_y_pos:h_occ+rand_y_pos, rand_x_pos:w_occ+rand_x_pos] = rectangle
+    
+    return img
+
+
+def random_shadow(image, area_range=(0.2, 1.0), level=-10, gamma=0.5):
+    img = image.copy()
+        
+    if len(img.shape)>=3:
+        h, w, d = img.shape
+    else:
+        h, w, d = img.shape, 1
+
+    w_occ_max, h_occ_max = int(max(area_range) * w), int(max(area_range) * h)
+    w_occ_min, h_occ_min = int(min(area_range) * w), int(min(area_range) * h)
+
+    w_occ = random.randint(w_occ_min, w_occ_max)
+    h_occ = random.randint(h_occ_min, h_occ_max)
+        
+    rand_x_pos = random.randint(0, w - w_occ)
+    rand_y_pos = random.randint(0, h - h_occ)
+
+    select_area = img[rand_y_pos:h_occ+rand_y_pos, rand_x_pos:w_occ+rand_x_pos]
+    
+    img_lo_ct = adjust_contrast(select_area, level)
+    img_lo_br = adjust_brightness(img_lo_ct, level)
+    img_lo_gm = adjust_gamma(img_lo_br, gamma=gamma)
+    
+    darker_area = img_lo_gm 
+    
+    img[rand_y_pos:h_occ+rand_y_pos, rand_x_pos:w_occ+rand_x_pos] = darker_area
+    
+    return img
+    
     
     
 

@@ -8,6 +8,7 @@ from . import functional as F
 from . import effects as E
 from ..ops import math_ops, image_ops, boxes_ops
 
+from skimage.util import random_noise
 
 class Compose(object):
     def __init__(self, transforms):
@@ -19,15 +20,23 @@ class Compose(object):
         return img
     
 class ComposeRandomChoice(Compose):
-    def __init__(self, transforms, k=1):
+    def __init__(self, transforms, k=1, debug=False):
         super(ComposeRandomChoice, self).__init__(transforms)
         self.k = k 
+        self.debug = debug
+        self.transforms_fn = random.sample(self.transforms, k=self.k)
     
     def __call__(self, img):
-        self.transforms = random.sample(self.transforms, k=self.k)
-        for t in self.transforms:
-                img = t(img)
+        self.transforms_fn = random.sample(self.transforms, k=self.k)
+        if self.debug: print(self.transforms_fn)
+        for t in self.transforms_fn:
+            img = t(img)
         return img
+    
+    def __repr__(self):
+        info = f'{self.__class__.__name__}'
+        info = info+ f'({self.transforms_fn})'
+        return info  
     
 class ComposeMulti(object):
     def __init__(self, transforms):
@@ -45,10 +54,41 @@ class ComposeMultiRandomChoice(ComposeMulti):
     
     def __call__(self, img, boxes):
         self.transforms = random.sample(self.transforms, k=self.k)
+        
         for t in self.transforms:
             img, boxes = t(img, boxes)
         return img, boxes
     
+
+
+class RandomNoise(object):
+    def __init__(self, amount_range=(0.07, 0.26), mode_choice=('pepper','s&p')):
+        self.amount_range = amount_range
+        self.mode_choice = mode_choice
+    
+    def __call__(self, image):
+        self.mode = random.choice(self.mode_choice)
+        self.amount = random.uniform(*self.amount_range)
+        
+        if image.shape[-1]==4:
+            b,g,r,a = cv.split(image)
+            bgr = cv.merge([b,g,r])
+            
+            noisy = random_noise(bgr, mode=self.mode, amount=self.amount)
+            noisy = (noisy * 255).astype(np.uint8)
+            b,g,r = cv.split(noisy)
+            noisy = cv.merge([b,g,r,a])
+        
+        else:
+            noisy = random_noise(image, mode=self.mode, amount=self.amount)
+            noisy = (noisy * 255).astype(np.uint8)
+            
+        return noisy
+    
+    def __repr__(self):
+        info = f'{self.__class__.__name__}'
+        info = info+ f'(amount_range={self.amount_range}, mode={self.mode_choice})'
+        return info  
 
 
 class Darken(object):
@@ -62,6 +102,11 @@ class Darken(object):
         img_lo_gm = F.adjust_gamma(img_lo_br, gamma=self.gamma)
         
         return img_lo_gm
+        
+    def __repr__(self):
+        info = f'{self.__class__.__name__}'
+        info = info + f'(level={self.level}, gamma={self.gamma})'
+        return info  
     
 class Lighten(object):
     def __init__(self, level=13, gamma=1.1):
@@ -75,6 +120,11 @@ class Lighten(object):
         
         return img_hi_gm
     
+    def __repr__(self):
+        info = f'{self.__class__.__name__}'
+        info = info + f'(level={self.level}, gamma={self.gamma})'
+        return info  
+    
     
 class ToLoRes(object):
     def __init__(self, factor=0.5):
@@ -83,6 +133,11 @@ class ToLoRes(object):
     def __call__(self, image):
         image = F.to_lo_res(image, factor=self.factor)
         return image
+        
+    def __repr__(self):
+        info = f'{self.__class__.__name__}'
+        info = info + f'(factor={self.factor})'
+        return info  
     
 class RandomLoRes(object):
     def __init__(self, factor_range=(0.4,0.6)):
@@ -92,65 +147,92 @@ class RandomLoRes(object):
         self.factor = random.uniform(*self.factor_range)
         image = F.to_lo_res(image, factor=self.factor)
         return image
+
+    def __repr__(self):
+        info = f'{self.__class__.__name__}'
+        info = info + f'(factor_range={self.factor_range})'
+        return info  
         
 
 class RandomGamma(object):
     def __init__(self, gamma_range=(1.0, 2.0), 
                  randomize=True, p=0.5):
-        self.gamma = gamma_range
+        self.gamma_range = gamma_range
         self.randomize = randomize
         self.rand_prob = p
     
     def __call__(self, image):
+        self.gamma = random.uniform(*self.gamma_range)
         if self.randomize and F.coin_toss(p=self.rand_prob):
-            self.gamma = random.uniform(*self.gamma)
             image = F.adjust_gamma(image, self.gamma)
 
         return image
+        
+    def __repr__(self):
+        info = f'{self.__class__.__name__}'
+        info = info + f'(gamma_range={self.gamma_range}, p={self.rand_prob})'
+        return info  
     
 
 class RandomContrast(object):
     def __init__(self, level_range=(10,30), 
                  randomize=True, p=0.5):
-        self.level = level_range
+        self.level_range = level_range
         self.randomize = randomize
         self.rand_prob = p
     
     def __call__(self, image):
+        self.level = int(random.uniform(*self.level_range))
         if self.randomize and F.coin_toss(p=self.rand_prob):
-            self.level = int(random.uniform(*self.level))
             image = F.adjust_contrast(image, self.level)
 
         return image
+    
+    def __repr__(self):
+        info = f'{self.__class__.__name__}'
+        info = info + f'(level_range={self.level_range}, p={self.rand_prob})'
+        return info    
+
             
 
 class RandomBrightness(object):
     def __init__(self, level_range=(10,30), 
                  randomize=True, p=0.5):
-        self.level = level_range
+        self.level_range = level_range
         self.randomize = randomize
         self.rand_prob = p
     
     def __call__(self, image):
+        self.level = int(random.uniform(*self.level_range))
         if self.randomize and F.coin_toss(p=self.rand_prob):
-            self.level = int(random.uniform(*self.level))
             image = F.adjust_brightness(image, self.level)
 
         return image
+        
+    def __repr__(self):
+        info = f'{self.__class__.__name__}'
+        info = info + f'(level_range={self.level_range}, p={self.rand_prob})'
+        return info    
+
     
 class RandomHueShifting(object):
-    def __init__(self, shift_range=(1,100), 
+    def __init__(self, shift_range=(1, 100), 
                  randomize=True, p=0.5):
-        self.shift = shift_range
+        self.shift_range = shift_range
         self.randomize = randomize
         self.rand_prob = p
     
     def __call__(self, image):
+        self.shift = int(random.uniform(*self.shift_range))
         if self.randomize and F.coin_toss(p=self.rand_prob):
-            self.shift = int(random.uniform(*self.shift))
             image = F.hue_shifting(image, self.shift)
-
+        
         return image
+    
+    def __repr__(self):
+        info = f'{self.__class__.__name__}'
+        info = info + f'(shift_range={self.shift_range}, p={self.rand_prob})'
+        return info    
     
 
 class RandomChannelShuffle(object):
@@ -163,6 +245,12 @@ class RandomChannelShuffle(object):
             image = F.channel_shuffle(image)
 
         return image
+        
+    def __repr__(self):
+        info = f'{self.__class__.__name__}'
+        info = info + f'(p={self.rand_prob})'
+        return info         
+    
     
 class RandomSharpen(object):
     def __init__(self, randomize=True, p=0.5):
@@ -175,6 +263,12 @@ class RandomSharpen(object):
 
         return image
     
+    def __repr__(self):
+        info = f'{self.__class__.__name__}'
+        info = info + f'(p={self.rand_prob})'
+        return info         
+    
+    
 class RandomEmboss(object):
     def __init__(self, randomize=True, p=0.5):
         self.randomize = randomize
@@ -185,22 +279,32 @@ class RandomEmboss(object):
             image = F.emboss(image)
 
         return image
+        
+    def __repr__(self):
+        info = f'{self.__class__.__name__}'
+        info = info + f'(p={self.rand_prob})'
+        return info  
     
     
 class RandomGaussionBlur(object):
     def __init__(self, sigma_range=(1.0, 5.0), ksize=(5,5),
                  randomize=True, p=0.5):
-        self.sigma = sigma_range
+        self.sigma_range = sigma_range
         self.ksize = ksize
         self.randomize = randomize
         self.rand_prob = p
         
     def __call__(self, image):
+        self.sigma = int(random.uniform(*self.sigma_range))
         if self.randomize and F.coin_toss(p=self.rand_prob):
-            self.sigma = int(random.uniform(*self.sigma))
             image = F.gaussian_blur(image, sigma=self.sigma, ksize=self.ksize)
 
         return image
+    
+    def __repr__(self):
+        info = f'{self.__class__.__name__}'
+        info = info + f'(sigma_range={self.sigma_range}, ksize={self.ksize}, p={self.rand_prob})'
+        return info  
     
 class RandomMedianBlur(object):
     def __init__(self, ksize=5, randomize=True, p=0.5):
@@ -212,46 +316,96 @@ class RandomMedianBlur(object):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = F.median_blur(image, ksize=self.ksize)
         return image
+        
+    def __repr__(self):
+        info = f'{self.__class__.__name__}'
+        info = info + f'(ksize={self.ksize}, p={self.rand_prob})'
+        return info  
     
 class RandomMorphDilation(object):
     def __init__(self, shift_range=(1,3), iterations=1,
                  randomize=True, p=0.5):
-        self.shift = shift_range
+        self.shift_range = shift_range
         self.iterations = iterations
         self.randomize = randomize
         self.rand_prob = p
         
     def __call__(self, image):
+        self.shift = int(random.uniform(*self.shift_range))
         if self.randomize and F.coin_toss(p=self.rand_prob):
-            self.shift = int(random.uniform(*self.shift))
             image = F.dilation_morphology(image, shift=self.shift,
                                           iterations=self.iterations)
         return image
     
+    def __repr__(self):
+        info = f'{self.__class__.__name__}'
+        info = info + f'(shift_range={self.shift_range}, iterations={self.iterations}, p={self.rand_prob})'
+        return info  
+    
 class RandomMorphOpening(object):
     def __init__(self, shift_range=(1,7), randomize=True, p=0.5):
-        self.shift = shift_range
+        self.shift_range = shift_range
         self.randomize = randomize
         self.rand_prob = p
         
     def __call__(self, image):
+        self.shift = int(random.uniform(*self.shift_range))
         if self.randomize and F.coin_toss(p=self.rand_prob):
-            self.shift = int(random.uniform(*self.shift))
             image = F.opening_morphology(image, shift=self.shift)
         return image
     
+    def __repr__(self):
+        info = f'{self.__class__.__name__}'
+        info = info+ f'(shift={self.shift_range}, p={self.rand_prob})'
+        return info
 
 class RandomMorphClosing(object):
     def __init__(self, shift_range=(1,5), randomize=True, p=0.5):
-        self.shift = shift_range
+        self.shift_range = shift_range
         self.randomize = randomize
         self.rand_prob = p
         
     def __call__(self, image):
+        self.shift = int(random.uniform(*self.shift_range))
         if self.randomize and F.coin_toss(p=self.rand_prob):
-            self.shift = int(random.uniform(*self.shift))
             image = F.closing_morphology(image, shift=self.shift)
-        return image        
+        return image     
+        
+    def __repr__(self):
+        info = f'{self.__class__.__name__}'
+        info = info+ f'(shift_range={self.shift_range}, p={self.rand_prob})'
+        return info   
+        
+        
+        
+
+class RandomErase(object):
+    def __init__(self, area_range=(0.3, 1.0), randomize=True, p=0.5):
+        self.area_range = area_range
+
+        self.rand_prob = p
+        self.randomize = randomize
+        
+    def __call__(self, image):
+        if self.randomize and F.coin_toss(p=self.rand_prob):
+            image = F.random_erasing(image, area_range=self.area_range)
+        return image
+    
+    
+class RandomShadow(object):
+    def __init__(self, area_range=(0.3, 1.0), level=-10, gamma=0.5, 
+                 randomize=True, p=0.5):
+        self.area_range = area_range
+        self.level = level
+        self.gamma = gamma
+        self.rand_prob = p
+        self.randomize = randomize
+        
+    def __call__(self, image):
+        if self.randomize and F.coin_toss(p=self.rand_prob):
+            image = F.random_shadow(image, area_range=self.area_range, 
+                                    level=self.level, gamma=self.gamma)
+        return image
         
 
 class RandomAddSunFlares(object):
@@ -263,6 +417,10 @@ class RandomAddSunFlares(object):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = E.add_sun_flare(image)
         return image 
+    
+    def __repr__(self):
+        info = f'{self.__class__.__name__}(p={self.rand_prob})'
+        return info  
 
 class RandomAddShadow(object):
     def __init__(self, randomize=True, p=0.5):
@@ -273,6 +431,10 @@ class RandomAddShadow(object):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = E.add_shadow(image)
         return image
+
+    def __repr__(self):
+        info = f'{self.__class__.__name__}(p={self.rand_prob})'
+        return info  
     
 class RandomAddFog(object):
     def __init__(self, randomize=True, p=0.5):
@@ -284,6 +446,10 @@ class RandomAddFog(object):
             image = E.add_fog(image)
         return image
 
+    def __repr__(self):
+        info = f'{self.__class__.__name__}(p={self.rand_prob})'
+        return info  
+
 class RandomAddSnow(object):
     def __init__(self, randomize=True, p=0.5):
         self.randomize = randomize
@@ -293,6 +459,10 @@ class RandomAddSnow(object):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = E.add_snow(image)
         return image
+        
+    def __repr__(self):
+        info = f'{self.__class__.__name__}(p={self.rand_prob})'
+        return info  
     
 class RandomAddRain(object):
     def __init__(self, randomize=True, p=0.5):
@@ -303,6 +473,10 @@ class RandomAddRain(object):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = E.add_rain(image)
         return image
+        
+    def __repr__(self):
+        info = f'{self.__class__.__name__}(p={self.rand_prob})'
+        return info  
     
 class RandomAddSpeed(object):
     def __init__(self, randomize=True, p=0.5):
@@ -316,6 +490,10 @@ class RandomAddSpeed(object):
             except:
                 pass
         return image  
+        
+    def __repr__(self):
+        info = f'{self.__class__.__name__}(p={self.rand_prob})'
+        return info  
 
 class RandomAddGravel(object):
     def __init__(self, randomize=True, p=0.5):
@@ -325,7 +503,11 @@ class RandomAddGravel(object):
     def __call__(self, image):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = E.add_gravel(image)
-        return image           
+        return image   
+        
+    def __repr__(self):
+        info = f'{self.__class__.__name__}(p={self.rand_prob})'
+        return info          
 
 class RandomAddAutumn(object):
     def __init__(self, randomize=True, p=0.5):
@@ -335,18 +517,12 @@ class RandomAddAutumn(object):
     def __call__(self, image):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = E.add_autumn(image)
-        return image           
-    
+        return image  
+        
+    def __repr__(self):
+        info = f'{self.__class__.__name__}(p={self.rand_prob})'
+        return info           
 
-class RandomResize(object):
-    def __init__(self, size, scale=(0.08, 1.0), ratio=(0.75, 1.3333), interpolation=cv.INTER_LINEAR):
-        self.size = size
-        self.scale = scale
-        self.ratio = ratio
-        self.interpolation = interpolation
-
-    def __call__(self, image: np.ndarray, boxes: np.ndarray):
-        pass
 
 
 class ResizeImageBoxes(object):
@@ -362,6 +538,11 @@ class ResizeImageBoxes(object):
             self.interpolation
         )
         return rimage, rboxes
+        
+        
+    def __repr__(self):
+        info = f'{self.__class__.__name__}(size={self.size})'
+        return info  
 
 
 class RandomRotation(object):
@@ -471,6 +652,49 @@ class RandomRotateAndShear(object):
         return simage, smwboxes, scboxes
 
 
+light_effect_fn = ComposeRandomChoice([
+    RandomGamma(gamma_range=(0.5, 2.5), p=0.5),
+    RandomContrast(level_range=(0, 20), p=0.5),
+    RandomBrightness(level_range=(20, 50), p=0.5),
+], k=2, debug=False)
+
+darklight_effect_fn = ComposeRandomChoice([
+    Darken(),
+    Lighten()
+], k=1, debug=False)
+
+color_effect_fn = ComposeRandomChoice([
+    RandomHueShifting(shift_range=(1, 100), p=0.5),
+    RandomChannelShuffle(p=0.5),
+], k=1, debug=False)
+
+morph_effect_fn = ComposeRandomChoice([
+    RandomMorphDilation(p=0.5),
+    RandomMorphOpening(p=0.5),
+    RandomMorphClosing(p=0.5)
+], k=1, debug=False)
+
+basic_effect_fn = ComposeRandomChoice([
+    light_effect_fn,
+    darklight_effect_fn,
+    color_effect_fn,
+    RandomLoRes(factor_range=(0.3, 0.5)),
+    RandomSharpen(p=1),
+    RandomNoise(amount_range=(0.05, 0.20)),
+    RandomGaussionBlur(sigma_range=(1.0, 5.0), p=1),
+    morph_effect_fn,
+], k=3, debug=False)
+
+advance_effect_fn = ComposeRandomChoice([
+    RandomAddSunFlares(p=0.5),
+    RandomAddShadow(p=0.5),
+    RandomAddSnow(p=0.5),
+    RandomAddRain(p=0.5),
+    RandomAddSpeed(p=0.5),
+    RandomAddFog(p=0.5),
+    RandomAddGravel(p=0.5),
+], k=1, debug=False)
+
 
 class AugmentGenerator(object):
     def __init__(self, scale_ratio=0.25, angle=45, shear_factor=0.3,
@@ -492,48 +716,6 @@ class AugmentGenerator(object):
             randomize=self.randomize, 
             rand_prob=self.rand_prob
         )
-        
-        self.light_effect_fn =  ComposeRandomChoice([
-            RandomGamma(gamma_range=(0.5, 2.5), p=0.5),
-            RandomContrast(level_range=(0, 20), p=0.5),
-            RandomBrightness(level_range=(20, 50), p=0.5),
-        ])
-        
-        self.color_effect_fn = ComposeRandomChoice([
-            RandomHueShifting(shift_range=(1, 100), p=0.5),
-            RandomChannelShuffle(p=0.5),
-        ])
-        
-        self.blur_effect_fn = ComposeRandomChoice([
-            RandomGaussionBlur(sigma_range=(1.0, 5.0), p=0.5),
-            RandomMedianBlur(p=0.5),
-        ])
-        
-        self.morph_effect_fn = ComposeRandomChoice([
-            RandomMorphDilation(p=0.5),
-            # RandomMorphOpening(p=0.5),
-            RandomMorphClosing(p=0.5)
-        ])
-        
-        self.basic_effect_fn = ComposeRandomChoice([
-            self.light_effect_fn,
-            # self.color_effect_fn,
-            self.blur_effect_fn,
-            self.morph_effect_fn
-        ], k=1)
-        
-        
-        
-        self.advance_effect_fn = ComposeRandomChoice([
-            RandomAddSunFlares(p=0.5),
-            RandomAddShadow(p=0.5),
-            RandomAddSnow(p=0.5),
-        #     RandomAddRain(p=0.5),
-            RandomAddSpeed(p=0.5),
-            RandomAddFog(p=0.5),
-            RandomAddGravel(p=0.5),
-        ], k=1)
-
 
     def __call__(self, background_image, foreground_image, mwboxes: np.ndarray = None, cboxes:List[np.ndarray] = None):
         # boxes = F.corner_from_shape(foreground_image)
@@ -558,7 +740,11 @@ class AugmentGenerator(object):
         segment_image = image_ops.join2image_withcoords(frgd_segment_image, segment_canvas, xybox)
 
         if self.use_basic_effect:
-            frgd_base_image = self.basic_effect_fn(frgd_base_image)
+            frgd_base_image = basic_effect_fn(frgd_base_image)
+            
+        
+        if frgd_base_image.shape[-1] != 4:
+            frgd_base_image = cv.cvtColor(frgd_base_image, cv.COLOR_BGR2BGRA)
             
         overlay_canvas = image_ops.create_canvas((bgH, bgW, 4), dtype=np.uint8)
         overlay_image = image_ops.join2image_withcoords(frgd_base_image, overlay_canvas, xybox)
@@ -566,8 +752,15 @@ class AugmentGenerator(object):
         composite_image = image_ops.composite2image(background_image, overlay_image)
         composite_image = composite_image.astype(np.uint8)
         
+        # print('Composite Image shape before basic effect',composite_image.shape)
+        
+        
         if self.use_adv_effect:
-            composite_image = self.advance_effect_fn(composite_image) 
+            composite_image = basic_effect_fn(composite_image)
+            # print('Composite Image shape after basic effect',composite_image.shape)
+            composite_image = advance_effect_fn(composite_image) 
+            
+            
 
         mwboxes = boxes_ops.boxes_reorder(mwboxes)
         mwboxes = mwboxes + [xmin, ymin]
@@ -585,36 +778,38 @@ class AugmentGenerator(object):
 
 
 if __name__ == "__main__":
-    rotate = RandomRotation(angle=12, randomize=True)
-    shear = RandomShear(shear_factor=0.9, randomize=True)
-    # resize = Resize(size=(500, 700))
-    random_augment = RandomAugment(angle=35, shear_factor=0.5)
+    # rotate = RandomRotation(angle=12, randomize=True)
+    # shear = RandomShear(shear_factor=0.9, randomize=True)
+    # # resize = Resize(size=(500, 700))
+    # random_augment = RandomAugment(angle=35, shear_factor=0.5)
 
-    image = cv.imread('../../data/idcard/base1.png', cv.IMREAD_UNCHANGED)
+    # image = cv.imread('../../data/idcard/base1.png', cv.IMREAD_UNCHANGED)
 
-    h, w = image.shape[:2]
+    # h, w = image.shape[:2]
 
-    box = [0, 0, w, h]
-    boxes = np.array([box])
-    boxes = F.get_corners(boxes)
+    # box = [0, 0, w, h]
+    # boxes = np.array([box])
+    # boxes = F.get_corners(boxes)
 
-    # rimage, rboxes = rotate(image, boxes)
-    # simage, sboxes = shear(rimage, rboxes)
-    # rz_image, rz_boxes = resize(simage, sboxes)
+    # # rimage, rboxes = rotate(image, boxes)
+    # # simage, sboxes = shear(rimage, rboxes)
+    # # rz_image, rz_boxes = resize(simage, sboxes)
 
-    # print(sboxes.astype(np.int32))
-    nimage, nboxes = random_augment(image, boxes)
+    # # print(sboxes.astype(np.int32))
+    # nimage, nboxes = random_augment(image, boxes)
 
-    # nimage = rz_image
-    nboxes = F.boxes_reorder(nboxes)
-    # print(nboxes)
+    # # nimage = rz_image
+    # nboxes = F.boxes_reorder(nboxes)
+    # # print(nboxes)
 
-    polyline_boxes = nboxes.reshape((-1, 1, 2)).astype(np.int32)
-    nimage = cv.polylines(nimage, [polyline_boxes], True, (0, 0, 255), 4)
+    # polyline_boxes = nboxes.reshape((-1, 1, 2)).astype(np.int32)
+    # nimage = cv.polylines(nimage, [polyline_boxes], True, (0, 0, 255), 4)
 
-    import matplotlib.pyplot as plt
+    # import matplotlib.pyplot as plt
 
-    plt.imshow(nimage[:, :, :3]);
-    plt.show()
-    print(f'Boxes: \n{nboxes}')
-    print(f'Image Shape: {nimage.shape}')
+    # plt.imshow(nimage[:, :, :3]);
+    # plt.show()
+    # print(f'Boxes: \n{nboxes}')
+    # print(f'Image Shape: {nimage.shape}')
+
+    pass

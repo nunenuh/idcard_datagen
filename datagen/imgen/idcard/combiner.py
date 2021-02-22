@@ -48,97 +48,117 @@ def combine(bg_path, idcard_path, dst_path,
             info += f"Processing augmented ({str(n)}/{str(num_generated)}) saved to {str(base_path)}"
             idcard_bar.set_description(info)
 
-            id_img = cv.imread(str(idfile), cv.IMREAD_UNCHANGED)
-            bg_img = cv.imread(str(bgfile), cv.IMREAD_COLOR)
-            json_data = open_json_file(jsfile)
+            data = combine_single(bgfile, idfile, jsfile, base_path, 
+                                  bg_size, scale_ratio, angle, shear)
             
-            if bg_size != None:
-                bsw, bsh = bg_size
-                bgh, bgw = bg_img.shape[:2]
-                if bgh>bgw: # potrait
-                    bg_size = (bsh, bsw)
-                if bgw>=bgh: #landscape
-                    bg_size = (bsw, bsh)
-                
-                bg_img = cv.resize(bg_img, bg_size, interpolation=cv.INTER_LINEAR)
-                
-
-            # reformat json data
-            data_record  = content_utils.reformat_json_data(json_data)
-            mwboxes, cnames, scnames, texts, labels, sequence, genseq, cboxes, clist = data_record
+            image_fpath, cmp_img = data['image_path'], data['image_data']
+            mask_fpath, seg_img = data['mask_path'], data['mask_data']
+            json_fpath, json_dict = data['json_path'], data['json_data']
             
-            
-            #prepare for augment
-            mwboxes = mwboxes.reshape(-1, 8)
-            cboxes_list = []
-            for cbox in cboxes:
-                cbox = cbox.reshape(-1, 8)
-                cboxes_list.append(cbox)
-            cboxes = cboxes_list
-            
-            
-            ratio = random.choice(scale_ratio)
-            augment = transforms.AugmentGenerator(scale_ratio=ratio, angle=angle, shear_factor=shear)
-            seg_img, cmp_img, mwboxes, cboxes = augment(bg_img, id_img, mwboxes, cboxes)
-            seg_img = (seg_img * 255).astype(np.uint8)
-            
-
-
-            #prepare for creating child_boxes
-            main_boxes = mwboxes[0].copy()
-            main_boxes = boxes_ops.order_points(main_boxes).tolist()
-            word_boxes = mwboxes[1:len(mwboxes)].copy()
-            word_boxes = boxes_ops.order_points_batch(word_boxes).tolist()
-            
-            
-            chardata_list = []
-            for (cbox, clist) in zip(cboxes, clist):
-                cbox = boxes_ops.order_points_batch(cbox).tolist()
-                cdata_list = []
-                for (cb, cl) in zip(cbox, clist):
-                    cdict = OrderedDict({"char": cl, "points": cb})
-                    cdata_list.append(cdict)
-                    
-                chardata_list.append(cdata_list)
-                
-            #build and append every text
-            objects = []
-            zipped_iter = [word_boxes, chardata_list, cnames, scnames, texts, labels, sequence, genseq]
-            for (wbox, cdata, cn, scn, txt, lbl, seq, gs) in zip(*zipped_iter):
-                dt = OrderedDict({
-                    'text': txt, 
-                    'points': wbox,
-                    'classname': data_config.classname_list[cn],
-                    'subclass': data_config.subclassname_list[scn],
-                    'chardata': cdata,
-                    'label': lbl,
-                    'sequence': seq,
-                    'genseq': gs,
-                })
-                objects.append(dt)
-                
-            #prepare for savinf data
-            rnum = str(random.randrange(0, 999999))
-            image_fpath = base_path.joinpath(f'{rnum}_image.jpg')
-            mask_fpath = base_path.joinpath(f'{rnum}_mask.jpg')
-            json_fpath = base_path.joinpath(f'{rnum}_json.json')
-            
-            json_dict = {
-                'image': {'filename': str(image_fpath.name), 'dim': cmp_img.shape},
-                'mask': {'filename': str(mask_fpath.name), 'dim': seg_img.shape},
-                'scale_ratio': ratio,
-                'angle': augment.actual_angle,
-                'shear_factor': augment.actual_shear,
-                'box': main_boxes,
-                'objects': objects,
-            }
             
             cv.imwrite(str(image_fpath), cmp_img)
             cv.imwrite(str(mask_fpath), seg_img)
             fop.save_json_file(str(json_fpath), json_dict)
             c = c + 1
                 
-                
+
+def combine_single(bgfile, idfile, jsfile, base_path: Path,
+                   bg_size, scale_ratio, angle, shear):
+    
+    id_img = cv.imread(str(idfile), cv.IMREAD_UNCHANGED)
+    bg_img = cv.imread(str(bgfile), cv.IMREAD_COLOR)
+    json_data = open_json_file(jsfile)
+    
+    if bg_size != None:
+        bsw, bsh = bg_size
+        bgh, bgw = bg_img.shape[:2]
+        if bgh>bgw: # potrait
+            bg_size = (bsh, bsw)
+        if bgw>=bgh: #landscape
+            bg_size = (bsw, bsh)
+        
+        bg_img = cv.resize(bg_img, bg_size, interpolation=cv.INTER_LINEAR)
+        
+
+    # reformat json data
+    data_record  = content_utils.reformat_json_data(json_data)
+    mwboxes, cnames, scnames, texts, labels, sequence, genseq, cboxes, clist = data_record
+    
+    
+    #prepare for augment
+    mwboxes = mwboxes.reshape(-1, 8)
+    cboxes_list = []
+    for cbox in cboxes:
+        cbox = cbox.reshape(-1, 8)
+        cboxes_list.append(cbox)
+    cboxes = cboxes_list
+    
+    #Augment Generator
+    ratio = random.choice(scale_ratio)
+    augment = transforms.AugmentGenerator(scale_ratio=ratio, angle=angle, shear_factor=shear)
+    seg_img, cmp_img, mwboxes, cboxes = augment(bg_img, id_img, mwboxes, cboxes)
+    seg_img = (seg_img * 255).astype(np.uint8)
+    
+    #prepare for creating child_boxes
+    main_boxes = mwboxes[0].copy()
+    main_boxes = boxes_ops.order_points(main_boxes).tolist()
+    word_boxes = mwboxes[1:len(mwboxes)].copy()
+    word_boxes = boxes_ops.order_points_batch(word_boxes).tolist()
+    
+    #prepare chardata
+    chardata_list = []
+    for (cbox, clist) in zip(cboxes, clist):
+        cbox = boxes_ops.order_points_batch(cbox).tolist()
+        cdata_list = []
+        for (cb, cl) in zip(cbox, clist):
+            cdict = OrderedDict({"char": cl, "points": cb})
+            cdata_list.append(cdict)
+            
+        chardata_list.append(cdata_list)
+        
+    #build and append every text
+    objects = []
+    zipped_iter = [word_boxes, chardata_list, cnames, scnames, texts, labels, sequence, genseq]
+    for (wbox, cdata, cn, scn, txt, lbl, seq, gs) in zip(*zipped_iter):
+        dt = OrderedDict({
+            'text': txt, 
+            'points': wbox,
+            'classname': data_config.classname_list[cn],
+            'subclass': data_config.subclassname_list[scn],
+            'chardata': cdata,
+            'label': lbl,
+            'sequence': seq,
+            'genseq': gs,
+        })
+        objects.append(dt)
+        
+    #prepare for savinf data
+    rnum = str(random.randrange(0, 999999))
+    image_fpath = base_path.joinpath(f'{rnum}_image.jpg')
+    mask_fpath = base_path.joinpath(f'{rnum}_mask.jpg')
+    json_fpath = base_path.joinpath(f'{rnum}_json.json')
+    
+    json_dict = {
+        'image': {'filename': str(image_fpath.name), 'dim': cmp_img.shape},
+        'mask': {'filename': str(mask_fpath.name), 'dim': seg_img.shape},
+        'scale_ratio': ratio,
+        'angle': augment.actual_angle,
+        'shear_factor': augment.actual_shear,
+        'box': main_boxes,
+        'objects': objects,
+    }
+    
+    data = {
+        'image_path': str(image_fpath),
+        'image_data': cmp_img,
+        'mask_path': str(mask_fpath),
+        'mask_data': seg_img,
+        'json_path': str(json_fpath),
+        'json_data': json_dict
+    }
+    
+    return data
+      
 def bg_data_balancer(bg_data, idcard_image_data):
     if len(idcard_image_data) > len(bg_data):
         mn_factor = len(idcard_image_data) // len(bg_data)

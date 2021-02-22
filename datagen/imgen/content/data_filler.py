@@ -7,9 +7,13 @@ from . import base_filler, draw
 from . import utils
 from . import ner_utils
 
+import random
 
-def fill_data(image, data_value, file_path: str = 'data/idcard/base3.json', pad_factor=0.01):
+def fill_data(image, data_value, file_path: str = 'data/idcard/base3.json', pad_factor=0.01,
+              randomize=False, xrange_pos=(-20,10), yrange_pos=(0, 15)):
     config = utils.inject_config(data_value, file_path=file_path)
+    if randomize:
+        config = randomize_text_position(config, xrpos=xrange_pos, yrpos=yrange_pos)
     default_setting: dict = config.get('default_setting')
     line_height: int = default_setting.get("line_height")
     last_added_line = 0
@@ -131,3 +135,31 @@ def fill_data(image, data_value, file_path: str = 'data/idcard/base3.json', pad_
 
 
     
+def randomize_text_position(config, xrpos=(-20,10), yrpos=(0, 15)):
+    xval = random.randint(xrpos[0], xrpos[1])
+    yval = random.randint(yrpos[0], yrpos[1])
+
+    cnames = config['classname']
+    for k in cnames.keys():
+        child = cnames[k]
+        if child['adjust'] == "normal":
+            fpos = child['field']['position']
+            fpos = [fpos[0] + xval, fpos[1]+yval]
+            child['field']['position'] = fpos
+
+            dpos = child['delimiter']['position']
+            dpos = [dpos[0] + xval, dpos[1]+yval]
+            child['delimiter']['position'] = dpos
+
+            vpos = child['value']['position']
+            vpos = [vpos[0] + xval, vpos[1]+yval]
+            child['value']['position'] = vpos
+
+        else:
+#             print(child)
+#             print()
+            pass
+    
+    config['classname'] = cnames
+    
+    return config
