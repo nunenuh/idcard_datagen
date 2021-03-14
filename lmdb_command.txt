@@ -1,0 +1,3 @@
+python lmdb_preprocessor.py --src /data/idcard/results/combined/crnn/20kv2/ \
+--dst /data/idcard/results/combined/crnn/20kv2ptxt/ \
+--val_split 0.1
