@@ -18,10 +18,10 @@ python combiner_idcard.py --bg_path data/background --bg_size "1280x960" \
 --num_generated 3
 
 
-python combiner_idcard.py --bg_path data/background --bg_size "1000x750" \
---idcard_path /data/idcard/base --dst_path /data/idcard/combined \
---angle 30 --scale_ratio "0.3, 1.0" --shear 0.2 \
---num_generated 1
+python combiner_idcard.py --bg_path /data/idcard/background/clean --bg_size "1000x750" \
+--idcard_path /data/idcard/base_100k --dst_path /data/idcard/combined/segmentv2 \
+--angle 45 --scale_ratio "0.3, 1.0" --shear 0.2 \
+--num_generated 10  
 
 python combiner_idcard.py --bg_path data/background --bg_size "1000x750" \
 --idcard_path /data/idcard/base_100k --dst_path /data/idcard/combined \
