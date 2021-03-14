@@ -8,7 +8,7 @@ from . import functional as F
 from . import effects as E
 from ..ops import math_ops, image_ops, boxes_ops
 
-from skimage.util import random_noise
+from skimage.util import noise, random_noise
 
 class Compose(object):
     def __init__(self, transforms):
@@ -62,26 +62,32 @@ class ComposeMultiRandomChoice(ComposeMulti):
 
 
 class RandomNoise(object):
-    def __init__(self, amount_range=(0.07, 0.26), mode_choice=('pepper','s&p')):
+    def __init__(self, amount_range=(0.07, 0.26), mode_choice=('pepper','s&p'),
+                 randomize=True, p=0.5):
         self.amount_range = amount_range
         self.mode_choice = mode_choice
+        self.randomize = randomize
+        self.rand_prob = p
     
     def __call__(self, image):
         self.mode = random.choice(self.mode_choice)
         self.amount = random.uniform(*self.amount_range)
         
-        if image.shape[-1]==4:
-            b,g,r,a = cv.split(image)
-            bgr = cv.merge([b,g,r])
+        if self.randomize and F.coin_toss(p=self.rand_prob):
+            if image.shape[-1]==4:
+                b,g,r,a = cv.split(image)
+                bgr = cv.merge([b,g,r])
+                
+                noisy = random_noise(bgr, mode=self.mode, amount=self.amount)
+                noisy = (noisy * 255).astype(np.uint8)
+                b,g,r = cv.split(noisy)
+                noisy = cv.merge([b,g,r,a])
             
-            noisy = random_noise(bgr, mode=self.mode, amount=self.amount)
-            noisy = (noisy * 255).astype(np.uint8)
-            b,g,r = cv.split(noisy)
-            noisy = cv.merge([b,g,r,a])
-        
+            else:
+                noisy = random_noise(image, mode=self.mode, amount=self.amount)
+                noisy = (noisy * 255).astype(np.uint8)
         else:
-            noisy = random_noise(image, mode=self.mode, amount=self.amount)
-            noisy = (noisy * 255).astype(np.uint8)
+            noisy = image
             
         return noisy
     
@@ -140,12 +146,16 @@ class ToLoRes(object):
         return info  
     
 class RandomLoRes(object):
-    def __init__(self, factor_range=(0.4,0.6)):
+    def __init__(self, factor_range=(0.4,0.6), 
+                 randomize=True, p=0.5):
         self.factor_range = factor_range
+        self.randomize = randomize
+        self.rand_prob = p
         
     def __call__(self, image):
         self.factor = random.uniform(*self.factor_range)
-        image = F.to_lo_res(image, factor=self.factor)
+        if self.randomize and F.coin_toss(p=self.rand_prob):
+            image = F.to_lo_res(image, factor=self.factor)
         return image
 
     def __repr__(self):
@@ -376,8 +386,6 @@ class RandomMorphClosing(object):
         info = info+ f'(shift_range={self.shift_range}, p={self.rand_prob})'
         return info   
         
-        
-        
 
 class RandomErase(object):
     def __init__(self, area_range=(0.3, 1.0), randomize=True, p=0.5):
@@ -522,7 +530,6 @@ class RandomAddAutumn(object):
     def __repr__(self):
         info = f'{self.__class__.__name__}(p={self.rand_prob})'
         return info           
-
 
 
 class ResizeImageBoxes(object):
@@ -674,42 +681,108 @@ morph_effect_fn = ComposeRandomChoice([
     RandomMorphClosing(p=0.5)
 ], k=1, debug=False)
 
-basic_effect_fn = ComposeRandomChoice([
+simple_basic_effect_fn = ComposeRandomChoice([
+    darklight_effect_fn,
+    color_effect_fn,
+    RandomLoRes(factor_range=(0.3, 0.5), p=0.5),
+    RandomSharpen(p=0.5),
+    RandomNoise(amount_range=(0.05, 0.06), p=0.5),
+    RandomGaussionBlur(sigma_range=(1.0, 5.0), p=0.5),
+], k=1, debug=False)
+
+
+medium_basic_effect_fn = ComposeRandomChoice([
     light_effect_fn,
     darklight_effect_fn,
     color_effect_fn,
-    RandomLoRes(factor_range=(0.3, 0.5)),
+    RandomLoRes(factor_range=(0.3, 0.5), p=1),
     RandomSharpen(p=1),
-    RandomNoise(amount_range=(0.05, 0.20)),
+    RandomNoise(amount_range=(0.05, 0.06)),
     RandomGaussionBlur(sigma_range=(1.0, 5.0), p=1),
     morph_effect_fn,
 ], k=3, debug=False)
 
-advance_effect_fn = ComposeRandomChoice([
+
+complex_basic_effect_fn = ComposeRandomChoice([
+    light_effect_fn,
+    darklight_effect_fn,
+    color_effect_fn,
+    RandomLoRes(factor_range=(0.3, 0.5), p=1),
+    RandomSharpen(p=1),
+    RandomNoise(amount_range=(0.05, 0.06), p=1),
+    RandomGaussionBlur(sigma_range=(1.0, 5.0), p=1),
+    morph_effect_fn,
+], k=5, debug=False)
+
+basic_effect_dict = {
+    'simple': simple_basic_effect_fn, 
+    "medium": medium_basic_effect_fn,
+    "complex": complex_basic_effect_fn,
+}
+
+simple_advance_effect_fn = ComposeRandomChoice([
+    RandomAddSunFlares(p=0.5),
+    RandomShadow(p=0.5),
+    RandomNoise(amount_range=(0.05, 0.07), p=0.5),
+], k=1, debug=False)
+
+medium_advance_effect_fn = ComposeRandomChoice([
     RandomAddSunFlares(p=0.5),
     RandomAddShadow(p=0.5),
+    RandomShadow(p=0.5),
+    RandomNoise(p=0.5),
     RandomAddSnow(p=0.5),
     RandomAddRain(p=0.5),
     RandomAddSpeed(p=0.5),
     RandomAddFog(p=0.5),
     RandomAddGravel(p=0.5),
-], k=1, debug=False)
+], k=3, debug=False)
 
+complex_advance_effect_fn = ComposeRandomChoice([
+    RandomAddSunFlares(p=0.5),
+    RandomAddShadow(p=0.5),
+    RandomShadow(p=0.5),
+    RandomNoise(p=0.5),
+    RandomAddSnow(p=0.5),
+    RandomAddRain(p=0.5),
+    RandomAddSpeed(p=0.5),
+    RandomAddFog(p=0.5),
+    RandomAddGravel(p=0.5),
+], k=5, debug=False)
+
+advance_effect_dict = {
+    "simple": simple_advance_effect_fn,
+    "medium": medium_advance_effect_fn,
+    "complex": complex_advance_effect_fn,
+}
 
 class AugmentGenerator(object):
-    def __init__(self, scale_ratio=0.25, angle=45, shear_factor=0.3,
-                 use_basic_effect=True, use_adv_effect=True,
-                 randomize=True, rand_prob=0.5):
+    def __init__(self, scale_ratio: float = 0.25, angle: int = 45, shear_factor: float = 0.3,
+                 use_basic_effect: bool = True, basic_effect_mode: str = "simple", 
+                 use_adv_effect: bool = True, adv_effect_mode: str = "simple",
+                 randomize: bool = True, rand_prob: float = 0.5):
         self.scale_ratio = scale_ratio
         self.angle = angle
         self.shear_factor = shear_factor
         self.randomize = randomize
         self.rand_prob = rand_prob
         self.use_basic_effect = use_basic_effect
+        self.basic_effect_mode = basic_effect_mode
         self.use_adv_effect = use_adv_effect
+        self.adv_effect_mode = adv_effect_mode
         
         self._init_objects_call_fn()
+        self._init_effect_fn()
         
+    
+    def _init_effect_fn(self):
+        basic_effect_mode = self.basic_effect_mode
+        self.basic_effect_fn = basic_effect_dict[basic_effect_mode]
+        
+        adv_effect_mode = self.adv_effect_mode
+        self.advance_effect_fn = advance_effect_dict[adv_effect_mode]
+        
+    
     def _init_objects_call_fn(self):
         self.random_rotate_shear_fn = RandomRotateAndShear(
             self.angle, self.shear_factor, 
@@ -740,7 +813,7 @@ class AugmentGenerator(object):
         segment_image = image_ops.join2image_withcoords(frgd_segment_image, segment_canvas, xybox)
 
         if self.use_basic_effect:
-            frgd_base_image = basic_effect_fn(frgd_base_image)
+            frgd_base_image = self.basic_effect_fn(frgd_base_image)
             
         
         if frgd_base_image.shape[-1] != 4:
@@ -756,9 +829,10 @@ class AugmentGenerator(object):
         
         
         if self.use_adv_effect:
-            composite_image = basic_effect_fn(composite_image)
+            if self.use_basic_effect:
+                composite_image = self.basic_effect_fn(composite_image)
             # print('Composite Image shape after basic effect',composite_image.shape)
-            composite_image = advance_effect_fn(composite_image) 
+            composite_image = self.advance_effect_fn(composite_image) 
             
             
 

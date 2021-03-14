@@ -22,7 +22,12 @@ def combine(bg_path, idcard_path, dst_path,
             idcard_ext="png", bg_ext="jpg|png", bg_size=None,
             angle: int = 30, shear: float = 0.5,
             scale_ratio: str = "0.3,0.8",
-            num_generated: int = 6):
+            num_generated: int = 6,
+            force_resize: bool = False,
+            use_basic_effect: bool = True,
+            basic_effect_mode: str = "simple",
+            use_adv_effect: bool = True,
+            adv_effect_mode: str = "simple"):
 
     
     bg_data, bg_path = clean_background_data(bg_path, bg_ext)
@@ -40,6 +45,7 @@ def combine(bg_path, idcard_path, dst_path,
 
     c = 0
     tc = len(idcard_image_data) * num_generated
+    print(f'Length of idcard data is {tc}')
     idcard_bar = tqdm(zip(bg_data, idcard_image_data, idcard_json_data))
     for (bgfile, idfile, jsfile) in idcard_bar:
         for n in range(num_generated):
@@ -49,7 +55,12 @@ def combine(bg_path, idcard_path, dst_path,
             idcard_bar.set_description(info)
 
             data = combine_single(bgfile, idfile, jsfile, base_path, 
-                                  bg_size, scale_ratio, angle, shear)
+                                  bg_size, scale_ratio, angle, shear,
+                                  force_resize=force_resize,
+                                  use_basic_effect=use_basic_effect,
+                                  basic_effect_mode=basic_effect_mode,
+                                  use_adv_effect=use_adv_effect,
+                                  adv_effect_mode=adv_effect_mode)
             
             image_fpath, cmp_img = data['image_path'], data['image_data']
             mask_fpath, seg_img = data['mask_path'], data['mask_data']
@@ -63,7 +74,12 @@ def combine(bg_path, idcard_path, dst_path,
                 
 
 def combine_single(bgfile, idfile, jsfile, base_path: Path,
-                   bg_size, scale_ratio, angle, shear):
+                   bg_size, scale_ratio, angle, shear, 
+                   force_resize: bool = False,
+                   use_basic_effect: bool = True,
+                   basic_effect_mode: str = "simple",
+                   use_adv_effect: bool = True,
+                   adv_effect_mode: str = "simple"):
     
     id_img = cv.imread(str(idfile), cv.IMREAD_UNCHANGED)
     bg_img = cv.imread(str(bgfile), cv.IMREAD_COLOR)
@@ -72,10 +88,11 @@ def combine_single(bgfile, idfile, jsfile, base_path: Path,
     if bg_size != None:
         bsw, bsh = bg_size
         bgh, bgw = bg_img.shape[:2]
-        if bgh>bgw: # potrait
-            bg_size = (bsh, bsw)
-        if bgw>=bgh: #landscape
-            bg_size = (bsw, bsh)
+        if force_resize==False:
+            if bgh>bgw: # potrait
+                bg_size = (bsh, bsw)
+            if bgw>=bgh: #landscape
+                bg_size = (bsw, bsh)
         
         bg_img = cv.resize(bg_img, bg_size, interpolation=cv.INTER_LINEAR)
         
@@ -95,7 +112,12 @@ def combine_single(bgfile, idfile, jsfile, base_path: Path,
     
     #Augment Generator
     ratio = random.choice(scale_ratio)
-    augment = transforms.AugmentGenerator(scale_ratio=ratio, angle=angle, shear_factor=shear)
+    augment = transforms.AugmentGenerator(scale_ratio=ratio, angle=angle, shear_factor=shear,
+                                          use_basic_effect=use_basic_effect, 
+                                          basic_effect_mode=basic_effect_mode,
+                                          use_adv_effect=use_adv_effect,
+                                          adv_effect_mode=adv_effect_mode)
+    
     seg_img, cmp_img, mwboxes, cboxes = augment(bg_img, id_img, mwboxes, cboxes)
     seg_img = (seg_img * 255).astype(np.uint8)
     

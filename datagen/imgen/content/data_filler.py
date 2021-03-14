@@ -1,3 +1,4 @@
+from datagen.imgen.transforms.functional import coin_toss
 import json
 import cv2 as cv
 import numpy as np
@@ -10,9 +11,10 @@ from . import ner_utils
 import random
 
 def fill_data(image, data_value, file_path: str = 'data/idcard/base3.json', pad_factor=0.01,
-              randomize=False, xrange_pos=(-20,10), yrange_pos=(0, 15)):
+              randomize=False, rand_prob=0.8, xrange_pos=(-20,10), yrange_pos=(0, 15)):
     config = utils.inject_config(data_value, file_path=file_path)
-    if randomize:
+    if randomize and utils.coin_toss(p=rand_prob):
+        # print("randomize true")
         config = randomize_text_position(config, xrpos=xrange_pos, yrpos=yrange_pos)
     default_setting: dict = config.get('default_setting')
     line_height: int = default_setting.get("line_height")
