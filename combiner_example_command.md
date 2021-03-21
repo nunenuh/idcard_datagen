@@ -6,9 +6,19 @@ python combiner_idcard.py --bg_path /data/idcard/source/background/clean --bg_si
 
 python combiner_idcard.py --bg_path /data/idcard/source/background/clean \
 --idcard_path /data/idcard/results/base/randomize/base20k \
---dst_path /data/idcard/results/combined/crnn/ \
+--dst_path /data/idcard/results/combined/layoutlm/ \
 --bg_size "1000x750" --force_resize True \
---angle 2 --scale_ratio "0.80, 1.0" --shear 0.2 \
+--angle 30 --scale_ratio "0.60, 1.001" --shear 0.2 \
+--use_basic_effect True --basic_effect_mode "simple" \
+--use_adv_effect True --adv_effect_mode "simple" \
+--num_generated 1
+
+
+python combiner_idcard.py --bg_path /data/idcard/source/background/clean \
+--idcard_path /data/idcard/results/base/randomize/base20k \
+--dst_path /data/idcard/results/combined/layoutlm \
+--bg_size "1000x750" --force_resize True \
+--angle 15 --scale_ratio "0.70, 1.0" --shear 0.2 \
 --use_basic_effect True --basic_effect_mode "simple" \
 --use_adv_effect True --adv_effect_mode "simple" \
 --num_generated 1

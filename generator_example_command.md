@@ -23,6 +23,12 @@ python generator_idcard.py --csv_path /data/idcard/results/csv/idcard_20k_160638
 
 
 python generator_idcard.py --csv_path /data/idcard/results/csv/idcard_50k_1612877927.csv \
---dst_path /data/idcard/results/base/randomize/base20k --image_path /data/idcard/source/idcard/base3.png \
+--dst_path /data/idcard/results/base/randomize/base50k --image_path /data/idcard/source/idcard/base3.png \
+--json_path /data/idcard/source/idcard/base3.json --photo_path /data/idcard/source/face/ \
+--randomize true
+
+
+python generator_idcard.py --csv_path /data/idcard/results/csv/idcard_100k_1606406736.csv \
+--dst_path /data/idcard/results/base/randomize/base100k --image_path /data/idcard/source/idcard/base3.png \
 --json_path /data/idcard/source/idcard/base3.json --photo_path /data/idcard/source/face/ \
 --randomize true
