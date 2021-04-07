@@ -1,5 +1,5 @@
 python generator_csv.py --num 1000 --dst_path results/csv --kode "31|52"
-python generator_csv.py --num 20000 --dst_path /data/idcard/csv --kode "31|32|33|34|35"
+python generator_csv.py --num 20000 --dst_path /data/idcard/csv --kode "31|32|33|34|35|52"
 
 
 python generator_idcard.py --csv_path results/csv/idcard_100_1605981819.csv \
