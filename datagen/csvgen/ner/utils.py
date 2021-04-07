@@ -1,4 +1,5 @@
 import random
+import numpy as np
 from . import config
 
 def field_entity_label(key, text):
@@ -37,11 +38,9 @@ def bilou_prefixer(text_list, label=None):
                 out.append(bl)
     return out
 
-def cointoss(true_prob=0.5):
-    data = [True, False]
-    weights = [true_prob, 1-true_prob]
-    result = random.choices(data, weights)
-    return result[0]
+def coin_toss(true_prob=0.5, n=1):    
+    result = np.random.binomial(n,true_prob) 
+    return bool(result)
 
 def flatten_pairs(data):
     lines, entities = [], []

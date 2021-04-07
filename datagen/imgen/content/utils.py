@@ -5,11 +5,9 @@ from ...config import data_config
 import random
 
 
-def coin_toss(p=0.5):
-    pf = 1-p
-    ot, wt = [True, False], [p, pf]
-    res = random.choices(population=ot, weights=wt, k=1)
-    return res[0]
+def coin_toss(p=0.5, n=1):    
+    result = np.random.binomial(n,p) 
+    return bool(result)
 
 def inject_config(data_value: dict, file_path: str = 'data/idcard/base3.json'):
     with open(file_path) as json_file:
