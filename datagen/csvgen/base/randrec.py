@@ -5,7 +5,10 @@ from . import randgen
 from . import config
 
 
-def ktp_data(kode_wilayah=None):
+def ktp_data(kode_wilayah=None, 
+             name_degree_prob=0.1, 
+             name_abbrev_prob=0.2,
+             berlaku_date_prob=0.2):
     wilayah = randgen.wilayah(kode_wilayah)
     provinsi = "PROVINSI " + wilayah['prov']['nama'].upper()
     kabupaten = wilayah['kab']['nama'].upper()
@@ -29,11 +32,15 @@ def ktp_data(kode_wilayah=None):
         gname = "female" 
     
     
+    nama = randgen.name(gender=gname, 
+                        degree_prob=name_degree_prob, 
+                        abbrev_prob=name_abbrev_prob).upper()
+    
     data = {    
         'provinsi': provinsi,
         'kabupaten': kabupaten,
         'nik': nik,
-        'nama': randgen.name(gender=gname).upper(),
+        'nama': nama,
         'ttl': ttl,
         'gender': gender,
         'goldar': randgen.blood_type(),
@@ -45,7 +52,7 @@ def ktp_data(kode_wilayah=None):
         'perkawinan': randgen.perkawinan().upper(),
         'pekerjaan': randgen.pekerjaan().upper(),
         'kewarganegaraan': randgen.kewarganegaraan(),
-        'berlaku': randgen.berlaku(),
+        'berlaku': randgen.berlaku(date_prob=berlaku_date_prob),
         'sign_place': randgen.sign_place(kabupaten),
         'sign_date':  randgen.sign_date().upper()
     }
@@ -53,7 +60,12 @@ def ktp_data(kode_wilayah=None):
     return data
 
 
-def ktp_generator(num_data:int, kode_wilayah=None, seed=None):
+def ktp_generator(num_data:int, 
+                  kode_wilayah=None,
+                  name_degree_prob=0.1, 
+                  name_abbrev_prob=0.2,
+                  berlaku_date_prob=0.2 ,
+                  seed=None):
     if seed==None:
         random.seed(config.random_seed)
         
@@ -79,7 +91,10 @@ def ktp_generator(num_data:int, kode_wilayah=None, seed=None):
     }
        
     for idx in tqdm(range(num_data)):
-        kdata = ktp_data(kode_wilayah=kode_wilayah)
+        kdata = ktp_data(kode_wilayah=kode_wilayah,
+                         name_degree_prob=name_degree_prob, 
+                         name_abbrev_prob=name_abbrev_prob,
+                         berlaku_date_prob=berlaku_date_prob,)
         for k,v in kdata.items():
             data[k].append(v)
             

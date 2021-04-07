@@ -5,6 +5,7 @@ csv_pekerjaan = 'data/csv_source/pekerjaan.csv'
 csv_perkawinan = 'data/csv_source/perkawinan.csv'
 csv_goldarah = 'data/csv_source/goldarah.csv'
 csv_nama = 'data/csv_source/nama.csv'
+csv_gelar = 'data/csv_source/nama_gelar.csv'
 csv_address = 'data/csv_source/alamat.csv'
 
 random_seed = 1261

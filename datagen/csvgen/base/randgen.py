@@ -1,11 +1,16 @@
 import random
-
+import numpy as np
+import string
 import pandas as pd
 from datetime import datetime
 
 from . import config
 
 
+
+def coin_toss(p=0.5, n=1):    
+    result = np.random.binomial(n,p) 
+    return bool(result)
 
 def random_choice(data, weight, k=1):
     choice = random.choices(data, weights=weight,k=k)
@@ -61,15 +66,60 @@ def blood_type(csv_path=None):
     weight = dframe['weights'].tolist()
     choice = random_choice(data, weight)
     return choice
+
+
+def degree(name, csv_path = None):
+    if csv_path == None:
+        csv_path = config.csv_gelar
+    dframe = pd.read_csv(csv_path)
+    sample = dframe.sample().reset_index(drop=True)
+    sample = sample['singkatan'][0]
+    sample = sample.strip()
+    out = f'{name}, {sample}'
     
-def name(gender='male', csv_path = None):
+    return out
+
+def abbrev_insert(name, is_gelar):
+    abjad = string.ascii_uppercase
+    abb = random.choices(abjad, k=1)[0]
+    
+    name_list = name.split(" ")
+    name_len = len(name_list)
+    middle_index = name_len // 2
+    
+    if is_gelar:
+        name_list.insert(middle_index, abb)
+    else:
+        ridx = random_choice(data=[middle_index, name_len], weight=[0.5,0.5])
+        if ridx==0:
+            ridx = name_len 
+        name_list.insert(ridx, abb)
+        
+    name_combined = ' '.join(name_list)
+    
+    return name_combined
+    
+    
+def name(gender='male', degree_prob=0.1, abbrev_prob=0.2, csv_path = None):
     if csv_path == None:
             csv_path = config.csv_nama
     dframe = pd.read_csv(csv_path)
     dframe = dframe[dframe['gender'] == gender]
-    sample = dframe.sample().reset_index(drop=True)
-    sample = sample['name'][0]
-    return sample
+    sampled_name = dframe.sample().reset_index(drop=True)
+    sampled_name = sampled_name['name'][0]
+    
+    use_gelar = False
+    if coin_toss(p=degree_prob):
+        sampled_name = degree(sampled_name)
+        use_gelar = True
+        
+    if coin_toss(p=abbrev_prob):
+        sampled_name = abbrev_insert(sampled_name, use_gelar)
+        
+    return sampled_name
+
+
+    
 
 
 def address(csv_path = None):
@@ -139,7 +189,9 @@ def agama(csv_path=None):
 def kewarganegaraan():
     return "WNI"
 
-def berlaku():
+def berlaku(date_prob=0.9):
+    if coin_toss(p=date_prob):
+        return sign_date(year_ago=10)
     return "SEUMUR HIDUP"
 
 def rtrw():
