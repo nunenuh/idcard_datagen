@@ -189,7 +189,7 @@ def agama(csv_path=None):
 def kewarganegaraan():
     return "WNI"
 
-def berlaku(date_prob=0.9):
+def berlaku(date_prob=0.5):
     if coin_toss(p=date_prob):
         return sign_date(year_ago=10)
     return "SEUMUR HIDUP"
