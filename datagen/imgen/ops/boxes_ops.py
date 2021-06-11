@@ -10,19 +10,13 @@ def order_points_batch(pts_array):
 
 
 def order_points(pts):
-    # initialzie a list of coordinates that will be ordered
-    # such that the first entry in the list is the top-left,
-    # the second entry is the top-right, the third is the
-    # bottom-right, and the fourth is the bottom-left
+
     rect = np.zeros((4, 2), dtype="float32")
-    # the top-left point will have the smallest sum, whereas
-    # the bottom-right point will have the largest sum
+    
     s = pts.sum(axis=1)
     rect[0] = pts[np.argmin(s)]
     rect[2] = pts[np.argmax(s)]
-    # now, compute the difference between the points, the
-    # top-right point will have the smallest difference,
-    # whereas the bottom-left will have the largest difference
+
     diff = np.diff(pts, axis=1)
     rect[1] = pts[np.argmin(diff)]
     rect[3] = pts[np.argmax(diff)]
@@ -75,13 +69,13 @@ def xywh_to_point(xywh, use_pad=False, pad_factor=0.01):
 
 
 def to_xyminmax_box(box: np.ndarray):
-    xmin, xmax = np.min(box[:, 1]), np.max(box[:, 1])
-    ymin, ymax = np.min(box[:, 0]), np.max(box[:, 0])
+    ymin, ymax = np.min(box[:, 1]), np.max(box[:, 1])
+    xmin, xmax = np.min(box[:, 0]), np.max(box[:, 0])
     return xmin, ymin, xmax, ymax
 
 def to_xyminmax(box: np.ndarray):
-    xmin, xmax = np.min(box[:, 1]), np.max(box[:, 1])
-    ymin, ymax = np.min(box[:, 0]), np.max(box[:, 0])
+    ymin, ymax = np.min(box[:, 1]), np.max(box[:, 1])
+    xmin, xmax = np.min(box[:, 0]), np.max(box[:, 0])
     return xmin, ymin, xmax, ymax
 
 def to_xywh(box):
