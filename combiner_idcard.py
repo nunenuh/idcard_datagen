@@ -42,11 +42,31 @@ parser.add_argument('--use_adv_effect', default=True, type=bool,
                     help='use advance effect',
                     required=False)
 
+
 parser.add_argument('--adv_effect_mode', default="simple", type=str,
                     help='fill adv_effect with simple, medium, or complex',
                     required=False)
 
 
+parser.add_argument('--balance_white_background', default=True, type=bool,
+                    help='balance background with white background, this is useful especially in scanner data',
+                    required=False)
+
+parser.add_argument('--white_background_factor', default=1.0, type=float,
+                    help='the factor of white background inserted to background',
+                    required=False)
+
+
+parser.add_argument('--balance_idcard_background', default=False, type=bool,
+                    help='balance the number idcard data and background data using random choice method',
+                    required=False)
+
+parser.add_argument('--sampled_background', default=True, type=bool,
+                    help='use random sampling to take background',
+                    required=False)
+
+
+# balance_white_bg=False, balance_bg=False, sampled_bg=True,
 
 args = parser.parse_args()
 
@@ -60,6 +80,10 @@ if __name__ == "__main__":
         idcard_ext=args.idcard_ext,
         bg_ext=args.bg_ext,
         bg_size=args.bg_size,
+        balance_white_bg=args.balance_white_background,
+        white_bg_factor =args.white_background_factor,
+        balance_bg=args.balance_idcard_background,
+        sampled_bg=args.sampled_background,
         force_resize=args.force_resize,
         angle=args.angle,
         shear=args.shear,

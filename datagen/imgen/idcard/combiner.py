@@ -61,7 +61,7 @@ def add_white_gray_files(bg_path, bg_data, repeat_factor=None,
     if repeat_factor==None:
         repeat = int(len(bg_data)/len(wg_file))
     else:
-        repeat = int(len(bg_data)*repeat_factor/len(wg_file))
+        repeat = int((len(bg_data)*repeat_factor)/len(wg_file))
     for i in range(repeat):
         for fname in wg_file:
             bgp  = bg_path.joinpath(fname)
@@ -227,6 +227,7 @@ def combine_single(bgfile, idfile, jsfile, base_path: Path,
 def combine(bg_path, idcard_path, dst_path,
             idcard_ext="png", bg_ext="jpg|png", bg_size=None,
             balance_white_bg=False, balance_bg=False, sampled_bg=True,
+            white_bg_factor=1.0,
             angle: int = 30, shear: float = 0.5,
             scale_ratio: str = "0.3,0.8",
             num_generated: int = 6,
@@ -239,7 +240,7 @@ def combine(bg_path, idcard_path, dst_path,
     
     bg_data, bg_path = clean_background_data(bg_path, bg_ext)
     if balance_white_bg:
-        bg_data = add_white_gray_files(bg_path, bg_data)
+        bg_data = add_white_gray_files(bg_path, bg_data, repeat_factor=white_bg_factor)
     
     idcard_image_data, idcard_json_data = clean_idcard_data(
         idcard_path, image_ext=idcard_ext
