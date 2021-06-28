@@ -258,8 +258,17 @@ def combine(bg_path, idcard_path, dst_path,
     c = 0
     tc = len(idcard_image_data) * num_generated
     print(f'Length of idcard data is {tc}')
-    idcard_bar = tqdm(zip(bg_data, idcard_image_data, idcard_json_data))
-    for (bgfile, idfile, jsfile) in idcard_bar:
+    if balance_bg:
+        idcard_bar = tqdm(zip(idcard_image_data, idcard_json_data, bg_data))
+    else:
+        idcard_bar = tqdm(zip(idcard_image_data, idcard_json_data))
+        
+    for idcard_zipped in idcard_bar:
+        if balance_bg:
+            idfile, jsfile, bgfile = idcard_zipped
+        else:
+            idfile, jsfile = idcard_zipped
+            
         if sampled_bg:
             bgfile = random.sample(bg_data, k=1)[0]
             
