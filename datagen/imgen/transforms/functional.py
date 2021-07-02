@@ -2,8 +2,10 @@ import numpy as np
 import cv2 as cv
 import random
 from numpy.core.fromnumeric import resize
+from PIL import Image
 
 from skimage import data, exposure, filters
+from skimage.util import noise, random_noise
 
 
 def coin_toss(p=0.5):
@@ -275,6 +277,18 @@ def to_lo_res(image, factor=0.5, interpolation=cv.INTER_LINEAR):
     image = cv.resize(image, (w, h), interpolation=interpolation)
     return image
 
+
+def xenox_filter(image, use_threshold=False, tmin=60, tmax=255, use_noise=False, noise_amount=0.15):
+    grayscale = cv.cvtColor(image.copy(), cv.COLOR_BGR2GRAY)
+    if use_threshold:
+        ret, grayscale = cv.threshold(grayscale, tmin, tmax, cv.THRESH_OTSU)
+    grayscale = np.array(Image.fromarray(grayscale).convert("RGB"))
+    grayscale = grayscale.astype(np.uint8)
+    if use_noise:
+        grayscale = random_noise(grayscale, mode='s&p', amount=noise_amount)
+        grayscale = (grayscale*255).astype(np.uint8)
+        
+    return grayscale
 
 
 def random_erasing(image, area_range=(0.1, 1.0)):

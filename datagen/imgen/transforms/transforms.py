@@ -95,7 +95,30 @@ class RandomNoise(object):
         info = f'{self.__class__.__name__}'
         info = info+ f'(amount_range={self.amount_range}, mode={self.mode_choice})'
         return info  
+    
+class RandomXenoxPhotocopy(object):
+    def __init__(self, noise_range=(0.05, 0.15), thresh_range=(60,255),
+                 randomize=True, p=0.5, noise_p=0.2, thresh_p = 0.2):
+        self.noise_range = noise_range
+        self.thresh_range = thresh_range
+        self.randomize = randomize
+        self.rand_prob = p 
+        self.noise_p = noise_p
+        self.thresh_p = thresh_p
+        
+    def __call__(self, image):
+        self.noise = random.uniform(*self.noise_range)
+        tmin, tmax = self.thresh_range  
+        
+        use_thresh = F.coin_toss(p=self.thresh_p)
+        use_noise = F.coin_toss(p=self.thresh_p)
+        probability = F.coin_toss(p=self.rand_prob)
+        
+        if self.randomize and probability:
+            image = F.xenox_filter(image, use_threshold=use_thresh, tmin=tmin, tmax=tmax, 
+                                   use_noise=use_noise, noise_amount=self.noise)
 
+        return image
 
 class Darken(object):
     def __init__(self, level=-10, gamma=0.5):
@@ -720,6 +743,26 @@ basic_effect_dict = {
     "complex": complex_basic_effect_fn,
 }
 
+foreground_effect_dict = {
+    'simple': simple_basic_effect_fn, 
+    "medium": medium_basic_effect_fn,
+    "complex": complex_basic_effect_fn,
+}
+
+background_effect_dict = {
+    'simple': simple_basic_effect_fn, 
+    "medium": medium_basic_effect_fn,
+    "complex": complex_basic_effect_fn,
+}
+
+composite_effect_dict = {
+    'simple': simple_basic_effect_fn, 
+    "medium": medium_basic_effect_fn,
+    "complex": complex_basic_effect_fn,
+}
+
+
+
 simple_advance_effect_fn = ComposeRandomChoice([
     RandomAddSunFlares(p=0.5),
     RandomShadow(p=0.5),
@@ -758,6 +801,7 @@ advance_effect_dict = {
 
 class AugmentGenerator(object):
     def __init__(self, scale_ratio: float = 0.25, angle: int = 45, shear_factor: float = 0.3,
+                 foreground_fx: str = "simple",  background_fx: str = "simple", composite_fx: str = "simple",
                  use_basic_effect: bool = True, basic_effect_mode: str = "simple", 
                  use_adv_effect: bool = True, adv_effect_mode: str = "simple",
                  randomize: bool = True, rand_prob: float = 0.5):
@@ -766,6 +810,11 @@ class AugmentGenerator(object):
         self.shear_factor = shear_factor
         self.randomize = randomize
         self.rand_prob = rand_prob
+        
+        self.foreground_fx = foreground_fx
+        self.background_fx = background_fx
+        self.composite_fx = composite_fx
+        
         self.use_basic_effect = use_basic_effect
         self.basic_effect_mode = basic_effect_mode
         self.use_adv_effect = use_adv_effect
@@ -776,6 +825,10 @@ class AugmentGenerator(object):
         
     
     def _init_effect_fn(self):
+        self.foreground_fxfn = foreground_effect_dict.get(self.foreground_fx, None)
+        self.background_fxfn = background_effect_dict.get(self.background_fx, None)
+        self.composite_fxfn = composite_effect_dict.get(self.composite_fx, None)
+        
         basic_effect_mode = self.basic_effect_mode
         self.basic_effect_fn = basic_effect_dict[basic_effect_mode]
         
@@ -789,53 +842,27 @@ class AugmentGenerator(object):
             randomize=self.randomize, 
             rand_prob=self.rand_prob
         )
-
-    def __call__(self, background_image, foreground_image, mwboxes: np.ndarray = None, cboxes:List[np.ndarray] = None):
-        # boxes = F.corner_from_shape(foreground_image)
-       
-        foreground_image, mwboxes, cboxes = self.random_rotate_shear_fn(foreground_image, mwboxes, cboxes)
-        self.actual_angle = self.random_rotate_shear_fn.rotation_angle
-        self.actual_shear = self.random_rotate_shear_fn.shear_factor
-
-        bgH, bgW = back_size = background_image.shape[:2]
-        fgH, fgW = frgd_size = foreground_image.shape[:2]
-        nfgdH, nfgdW = nfgd_size = math_ops.scale_size_ratio(back_size, frgd_size, ratio=self.scale_ratio)
-        xmin, ymin, xmax, ymax = xybox = math_ops.random_safe_box_location(back_size, nfgd_size)
-
-        # frgd_base_image = cv.resize(foreground_image, dsize=(nfgdW, nfgdH), interpolation=cv.INTER_LINEAR)
-        # resize_image_boxes = ResizeImageBoxes(size=(nfgdW, nfgdH))
         
-        frgd_base_image, mwboxes, cboxes = F.resize_image_boxes(foreground_image, mwboxes, cboxes,  size=(nfgdW, nfgdH))
+    def _create_segment_image(self, frgd_base_image, backgrd_size, xybox):
         frgd_segment_image = cv.split(frgd_base_image)[-1]
         frgd_segment_image = (frgd_segment_image > 0).astype(np.uint8)
-        
-        segment_canvas = image_ops.create_canvas(back_size,  dtype=np.uint8)
+        segment_canvas = image_ops.create_canvas(backgrd_size,  dtype=np.uint8)
         segment_image = image_ops.join2image_withcoords(frgd_segment_image, segment_canvas, xybox)
-
-        if self.use_basic_effect:
-            frgd_base_image = self.basic_effect_fn(frgd_base_image)
-            
         
-        if frgd_base_image.shape[-1] != 4:
-            frgd_base_image = cv.cvtColor(frgd_base_image, cv.COLOR_BGR2BGRA)
-            
+        return segment_image
+    
+    def _create_composite_image(self, background_image, frgd_base_image, xybox):
+        (bgH, bgW) = background_image.shape[:2]
         overlay_canvas = image_ops.create_canvas((bgH, bgW, 4), dtype=np.uint8)
         overlay_image = image_ops.join2image_withcoords(frgd_base_image, overlay_canvas, xybox)
         
         composite_image = image_ops.composite2image(background_image, overlay_image)
         composite_image = composite_image.astype(np.uint8)
         
-        # print('Composite Image shape before basic effect',composite_image.shape)
-        
-        
-        if self.use_adv_effect:
-            if self.use_basic_effect:
-                composite_image = self.basic_effect_fn(composite_image)
-            # print('Composite Image shape after basic effect',composite_image.shape)
-            composite_image = self.advance_effect_fn(composite_image) 
-            
-            
+        return composite_image
 
+    def _reorder_boxes(self, mwboxes, cboxes, xybox):
+        xmin, ymin, xmax, ymax = xybox
         mwboxes = boxes_ops.boxes_reorder(mwboxes)
         mwboxes = mwboxes + [xmin, ymin]
         
@@ -846,11 +873,83 @@ class AugmentGenerator(object):
             cboxes_list.append(cb)
         cboxes = cboxes_list
         
+        return mwboxes, cboxes
+    
+    def _get_nfgd_xybox(self, back_size, frgd_size):
+        nfgd_size = math_ops.scale_size_ratio(back_size, frgd_size, ratio=self.scale_ratio)
+        xybox = math_ops.random_safe_box_location(back_size, nfgd_size)
+        return nfgd_size, xybox
+        
+
+    def __call__(self, background_image, foreground_image, mwboxes: np.ndarray = None, cboxes:List[np.ndarray] = None):
+        # boxes = F.corner_from_shape(foreground_image)
+       
+        foreground_image, mwboxes, cboxes = self.random_rotate_shear_fn(foreground_image, mwboxes, cboxes)
+        self.actual_angle = self.random_rotate_shear_fn.rotation_angle
+        self.actual_shear = self.random_rotate_shear_fn.shear_factor
+
+        back_size = background_image.shape[:2]
+        frgd_size = foreground_image.shape[:2]
+        
+        # nfgd_size = math_ops.scale_size_ratio(back_size, frgd_size, ratio=self.scale_ratio)
+        # xybox = math_ops.random_safe_box_location(back_size, nfgd_size)
+        # nfgdH, nfgdW = nfgd_size
+        
+        nfgd_size, xybox = self._get_nfgd_xybox(back_size, frgd_size)
+        nfgdH, nfgdW = nfgd_size
+        
+        # frgd_base_image = cv.resize(foreground_image, dsize=(nfgdW, nfgdH), interpolation=cv.INTER_LINEAR)
+        # resize_image_boxes = ResizeImageBoxes(size=(nfgdW, nfgdH))
+        frgd_base_image, mwboxes, cboxes = F.resize_image_boxes(foreground_image, mwboxes, cboxes,  size=(nfgdW, nfgdH))
+        segment_image = self._create_segment_image(frgd_base_image, back_size, xybox) 
+        
+        # frgd_segment_image = cv.split(frgd_base_image)[-1]
+        # frgd_segment_image = (frgd_segment_image > 0).astype(np.uint8)
+        # segment_canvas = image_ops.create_canvas(back_size,  dtype=np.uint8)
+        # segment_image = image_ops.join2image_withcoords(frgd_segment_image, segment_canvas, xybox)
+
+        if self.use_basic_effect:
+            frgd_base_image = self.basic_effect_fn(frgd_base_image)
+            
+        if frgd_base_image.shape[-1] != 4:
+            frgd_base_image = cv.cvtColor(frgd_base_image, cv.COLOR_BGR2BGRA)
+            
+        # overlay_canvas = image_ops.create_canvas((bgH, bgW, 4), dtype=np.uint8)
+        # overlay_image = image_ops.join2image_withcoords(frgd_base_image, overlay_canvas, xybox)
+        
+        # composite_image = image_ops.composite2image(background_image, overlay_image)
+        # composite_image = composite_image.astype(np.uint8)
+        
+        composite_image = self._create_composite_image(background_image, frgd_base_image, xybox)
+        
+        # print('Composite Image shape before basic effect',composite_image.shape)
+        
+        if self.use_adv_effect:
+            if self.use_basic_effect:
+                composite_image = self.basic_effect_fn(composite_image)
+            # print('Composite Image shape after basic effect',composite_image.shape)
+            composite_image = self.advance_effect_fn(composite_image) 
+            
+            
+
+        # mwboxes = boxes_ops.boxes_reorder(mwboxes)
+        # mwboxes = mwboxes + [xmin, ymin]
+        
+        # cboxes_list = []
+        # for cb in cboxes:
+        #     cb = boxes_ops.boxes_reorder(cb)
+        #     cb = cb + [xmin, ymin]
+        #     cboxes_list.append(cb)
+        # cboxes = cboxes_list
+        
+        mwboxes, cboxes = self._reorder_boxes(mwboxes, cboxes, xybox)
+        
         
 
         return segment_image, composite_image, mwboxes, cboxes
 
 
+        
 if __name__ == "__main__":
     # rotate = RandomRotation(angle=12, randomize=True)
     # shear = RandomShear(shear_factor=0.9, randomize=True)
