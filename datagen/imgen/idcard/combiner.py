@@ -230,10 +230,8 @@ def combine(bg_path, idcard_path, dst_path,
             scale_ratio: str = "0.3,0.8",
             num_generated: int = 6,
             force_resize: bool = False,
-            use_basic_effect: bool = True,
-            basic_effect_mode: str = "simple",
-            use_adv_effect: bool = True,
-            adv_effect_mode: str = "simple"):
+            foreground_fx: str = "simple", background_fx: str = "simple",
+            composite_bfx: str = "simple", composite_afx: str = "simple",):
 
     
     bg_data, bg_path = clean_background_data(bg_path, bg_ext)
@@ -279,10 +277,10 @@ def combine(bg_path, idcard_path, dst_path,
             data = combine_single(bgfile, idfile, jsfile, base_path, 
                                   bg_size, scale_ratio, angle, shear,
                                   force_resize=force_resize,
-                                  use_basic_effect=use_basic_effect,
-                                  basic_effect_mode=basic_effect_mode,
-                                  use_adv_effect=use_adv_effect,
-                                  adv_effect_mode=adv_effect_mode)
+                                  foreground_fx=foreground_fx,
+                                  background_fx=background_fx,
+                                  composite_bfx=composite_bfx,
+                                  composite_afx=composite_afx)
             
             image_fpath, cmp_img = data['image_path'], data['image_data']
             mask_fpath, seg_img = data['mask_path'], data['mask_data']
