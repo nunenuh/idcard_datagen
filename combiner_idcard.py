@@ -30,22 +30,17 @@ parser.add_argument('--scale_ratio', default="0.3,0.8", type=str,
 parser.add_argument('--num_generated', default=6, type=int,
                     help='number of combined generated data from same idcard and background image')
 
-parser.add_argument('--use_basic_effect', default=True, type=bool,
-                    help='use basic effect',
-                    required=False)
+parser.add_argument('--foreground_fx', default="simple", type=str, required=False,
+                    help='fill idcard with basic effect')
 
-parser.add_argument('--basic_effect_mode', default="simple", type=str,
-                    help='fill basic_effect with simple, medium, or complex',
-                    required=False)
+parser.add_argument('--background_fx', default="simple", type=str, required=False,
+                    help='fill basic_effect with simple, medium, or complex')
 
-parser.add_argument('--use_adv_effect', default=True, type=bool,
-                    help='use advance effect',
-                    required=False)
+parser.add_argument('--composite_bfx', default="simple", type=str, required=False,
+                    help='fill basic_effect with simple, medium, or complex')
 
-
-parser.add_argument('--adv_effect_mode', default="simple", type=str,
-                    help='fill adv_effect with simple, medium, or complex',
-                    required=False)
+parser.add_argument('--composite_afx', default="simple", type=str, required=False,
+                    help='fill basic_effect with simple, medium, or complex')
 
 
 parser.add_argument('--balance_white_background', default=True, type=bool,
@@ -55,7 +50,6 @@ parser.add_argument('--balance_white_background', default=True, type=bool,
 parser.add_argument('--white_background_factor', default=1.0, type=float,
                     help='the factor of white background inserted to background',
                     required=False)
-
 
 parser.add_argument('--balance_idcard_background', default=False, type=bool,
                     help='balance the number idcard data and background data using random choice method',
@@ -89,8 +83,8 @@ if __name__ == "__main__":
         shear=args.shear,
         scale_ratio=args.scale_ratio,
         num_generated=args.num_generated,
-        use_basic_effect=args.use_basic_effect,
-        basic_effect_mode=args.basic_effect_mode,
-        use_adv_effect=args.use_adv_effect,
-        adv_effect_mode=args.adv_effect_mode
+        foreground_fx=args.foreground_fx,
+        background_fx=args.background_fx,
+        composite_bfx=args.composite_bfx,
+        composite_afx=args.composite_afx
     )
