@@ -24,7 +24,56 @@ morph_effect_fn = ComposeRandomChoice([
     RandomMorphClosing(p=0.5)
 ], k=1, debug=False)
 
-simple_basic_effect_fn = ComposeRandomChoice([
+
+####################### foreground effect ######################
+
+foreground_simple_effect_fn = ComposeRandomChoice([
+    darklight_effect_fn,
+    color_effect_fn,
+    RandomXenoxPhotocopy(p=0.5, noise_p=0.3, thresh_p=0.5),
+    RandomLoRes(factor_range=(0.3, 0.5), p=0.5),
+    RandomSharpen(p=0.5),
+    RandomNoise(amount_range=(0.05, 0.06), p=0.5),
+    RandomGaussionBlur(sigma_range=(1.0, 5.0), p=0.5),
+], k=1, debug=False)
+
+foreground_medium_effect_fn = ComposeRandomChoice([
+    light_effect_fn,
+    darklight_effect_fn,
+    color_effect_fn,
+    RandomXenoxPhotocopy(p=1, noise_p=0.3, thresh_p=0.8),
+    RandomLoRes(factor_range=(0.3, 0.5), p=1),
+    RandomSharpen(p=1),
+    RandomNoise(amount_range=(0.05, 0.06)),
+    RandomGaussionBlur(sigma_range=(1.0, 5.0), p=1),
+    morph_effect_fn,
+], k=3, debug=False)
+
+foreground_complex_effect_fn = ComposeRandomChoice([
+    light_effect_fn,
+    darklight_effect_fn,
+    color_effect_fn,
+    RandomXenoxPhotocopy(p=1, noise_p=0.5, thresh_p=0.8),
+    RandomLoRes(factor_range=(0.3, 0.5), p=1),
+    RandomSharpen(p=1),
+    RandomNoise(amount_range=(0.05, 0.06), p=1),
+    RandomGaussionBlur(sigma_range=(1.0, 5.0), p=1),
+    morph_effect_fn,
+], k=5, debug=False)
+
+
+foreground_effect_dict = {
+    'simple': foreground_simple_effect_fn, 
+    "medium": foreground_medium_effect_fn,
+    "complex": foreground_complex_effect_fn,
+}
+
+######################## eof foreground effect #######################
+
+
+####################### background effect ######################
+
+background_simple_effect_fn = ComposeRandomChoice([
     darklight_effect_fn,
     color_effect_fn,
     RandomLoRes(factor_range=(0.3, 0.5), p=0.5),
@@ -33,8 +82,7 @@ simple_basic_effect_fn = ComposeRandomChoice([
     RandomGaussionBlur(sigma_range=(1.0, 5.0), p=0.5),
 ], k=1, debug=False)
 
-
-medium_basic_effect_fn = ComposeRandomChoice([
+background_medium_effect_fn = ComposeRandomChoice([
     light_effect_fn,
     darklight_effect_fn,
     color_effect_fn,
@@ -45,8 +93,7 @@ medium_basic_effect_fn = ComposeRandomChoice([
     morph_effect_fn,
 ], k=3, debug=False)
 
-
-complex_basic_effect_fn = ComposeRandomChoice([
+background_complex_effect_fn = ComposeRandomChoice([
     light_effect_fn,
     darklight_effect_fn,
     color_effect_fn,
@@ -58,15 +105,66 @@ complex_basic_effect_fn = ComposeRandomChoice([
 ], k=5, debug=False)
 
 
+background_effect_dict = {
+    'simple': background_simple_effect_fn, 
+    "medium": background_medium_effect_fn,
+    "complex": background_complex_effect_fn,
+}
+
+######################## eof foreground effect #######################
+
+####################### composite_bfx base effect ######################
+
+composite_bfx_simple_effect_fn = ComposeRandomChoice([
+    darklight_effect_fn,
+    color_effect_fn,
+    RandomLoRes(factor_range=(0.3, 0.5), p=0.5),
+    RandomSharpen(p=0.5),
+    RandomNoise(amount_range=(0.05, 0.06), p=0.5),
+    RandomGaussionBlur(sigma_range=(1.0, 5.0), p=0.5),
+], k=1, debug=False)
+
+composite_bfx_medium_effect_fn = ComposeRandomChoice([
+    light_effect_fn,
+    darklight_effect_fn,
+    color_effect_fn,
+    RandomLoRes(factor_range=(0.3, 0.5), p=1),
+    RandomSharpen(p=1),
+    RandomNoise(amount_range=(0.05, 0.06)),
+    RandomGaussionBlur(sigma_range=(1.0, 5.0), p=1),
+    morph_effect_fn,
+], k=3, debug=False)
+
+composite_bfx_complex_effect_fn = ComposeRandomChoice([
+    light_effect_fn,
+    darklight_effect_fn,
+    color_effect_fn,
+    RandomLoRes(factor_range=(0.3, 0.5), p=1),
+    RandomSharpen(p=1),
+    RandomNoise(amount_range=(0.05, 0.06), p=1),
+    RandomGaussionBlur(sigma_range=(1.0, 5.0), p=1),
+    morph_effect_fn,
+], k=5, debug=False)
 
 
-simple_advance_effect_fn = ComposeRandomChoice([
+composite_bfx_effect_dict = {
+    'simple': composite_bfx_simple_effect_fn, 
+    "medium": composite_bfx_medium_effect_fn,
+    "complex": composite_bfx_complex_effect_fn,
+}
+
+######################## eof composite_bfx base effect #######################
+
+
+####################### composite_afx effect ######################
+
+composite_afx_simple_effect_fn = ComposeRandomChoice([
     RandomAddSunFlares(p=0.5),
     RandomShadow(p=0.5),
     RandomNoise(amount_range=(0.05, 0.07), p=0.5),
 ], k=1, debug=False)
 
-medium_advance_effect_fn = ComposeRandomChoice([
+composite_afx_medium_effect_fn = ComposeRandomChoice([
     RandomAddSunFlares(p=0.5),
     RandomAddShadow(p=0.5),
     RandomShadow(p=0.5),
@@ -78,7 +176,7 @@ medium_advance_effect_fn = ComposeRandomChoice([
     RandomAddGravel(p=0.5),
 ], k=3, debug=False)
 
-complex_advance_effect_fn = ComposeRandomChoice([
+composite_afx_complex_effect_fn = ComposeRandomChoice([
     RandomAddSunFlares(p=0.5),
     RandomAddShadow(p=0.5),
     RandomShadow(p=0.5),
@@ -91,33 +189,11 @@ complex_advance_effect_fn = ComposeRandomChoice([
 ], k=5, debug=False)
 
 
-
-basic_effect_dict = {
-    'simple': simple_basic_effect_fn, 
-    "medium": medium_basic_effect_fn,
-    "complex": complex_basic_effect_fn,
+composite_afx_effect_dict = {
+    'simple': composite_afx_simple_effect_fn, 
+    "medium": composite_afx_medium_effect_fn,
+    "complex": composite_afx_complex_effect_fn,
 }
 
-foreground_effect_dict = {
-    'simple': simple_basic_effect_fn, 
-    "medium": medium_basic_effect_fn,
-    "complex": complex_basic_effect_fn,
-}
+######################## eof composite_afx base effect #######################
 
-background_effect_dict = {
-    'simple': simple_basic_effect_fn, 
-    "medium": medium_basic_effect_fn,
-    "complex": complex_basic_effect_fn,
-}
-
-composite_base_effect_dict = {
-    'simple': simple_basic_effect_fn, 
-    "medium": medium_basic_effect_fn,
-    "complex": complex_basic_effect_fn,
-}
-
-composite_adv_effect_dict = {
-    "simple": simple_advance_effect_fn,
-    "medium": medium_advance_effect_fn,
-    "complex": complex_advance_effect_fn,
-}

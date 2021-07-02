@@ -120,8 +120,8 @@ def clean_augment_param(angle, shear, scale_ratio, num_generated):
 def combine_single(bgfile, idfile, jsfile, base_path: Path,
                    bg_size, scale_ratio, angle, shear, 
                    force_resize: bool = False,
-                   foreground_fx: str = "simple", background_fx: str = "simple",
-                   composite_bfx: str = "simple", composite_afx: str = "simple",):
+                   foreground_fx: str = "simple", background_fx: str = None,
+                   composite_bfx: str = None, composite_afx: str = "simple",):
     
     id_img = cv.imread(str(idfile), cv.IMREAD_UNCHANGED)
     bg_img = cv.imread(str(bgfile), cv.IMREAD_COLOR)
@@ -230,8 +230,8 @@ def combine(bg_path, idcard_path, dst_path,
             scale_ratio: str = "0.3,0.8",
             num_generated: int = 6,
             force_resize: bool = False,
-            foreground_fx: str = "simple", background_fx: str = "simple",
-            composite_bfx: str = "simple", composite_afx: str = "simple",):
+            foreground_fx: str = "simple", background_fx: str = None,
+            composite_bfx: str = None, composite_afx: str = "simple",):
 
     
     bg_data, bg_path = clean_background_data(bg_path, bg_ext)

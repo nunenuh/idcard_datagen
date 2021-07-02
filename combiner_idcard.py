@@ -31,17 +31,16 @@ parser.add_argument('--num_generated', default=6, type=int,
                     help='number of combined generated data from same idcard and background image')
 
 parser.add_argument('--foreground_fx', default="simple", type=str, required=False,
-                    help='fill idcard with basic effect')
+                    help='fill idcard effect with simple, medium, or complex')
 
-parser.add_argument('--background_fx', default="simple", type=str, required=False,
-                    help='fill basic_effect with simple, medium, or complex')
+parser.add_argument('--background_fx', default=None, type=str, required=False,
+                    help='fill background effect with simple, medium, or complex')
 
-parser.add_argument('--composite_bfx', default="simple", type=str, required=False,
-                    help='fill basic_effect with simple, medium, or complex')
+parser.add_argument('--composite_bfx', default=None, type=str, required=False,
+                    help='fill composite image with basic simple, medium, or complex')
 
 parser.add_argument('--composite_afx', default="simple", type=str, required=False,
-                    help='fill basic_effect with simple, medium, or complex')
-
+                    help='fill composite image with advance simple, medium, or complex')
 
 parser.add_argument('--balance_white_background', default=True, type=bool,
                     help='balance background with white background, this is useful especially in scanner data',

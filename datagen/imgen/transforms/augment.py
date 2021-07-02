@@ -13,8 +13,8 @@ from .transforms import *
 
 class AugmentGenerator(object):
     def __init__(self, scale_ratio: float = 0.25, angle: int = 45, shear_factor: float = 0.3,
-                 foreground_fx: str = "simple",  background_fx: str = "simple", 
-                 composite_bfx: str = "simple", composite_afx: str = "simple",
+                 foreground_fx: str = "simple",  background_fx: str = None, 
+                 composite_bfx: str = None, composite_afx: str = "simple",
                  randomize: bool = True, rand_prob: float = 0.5):
         self.scale_ratio = scale_ratio
         self.angle = angle
@@ -34,8 +34,8 @@ class AugmentGenerator(object):
     def _init_effect_fn(self):
         self.foreground_fx = tpack.foreground_effect_dict.get(self.foreground_fx, None)
         self.background_fx = tpack.background_effect_dict.get(self.background_fx, None)
-        self.composite_bfx = tpack.composite_base_effect_dict.get(self.composite_bfx, None)
-        self.composite_afx = tpack.composite_adv_effect_dict.get(self.composite_afx, None)
+        self.composite_bfx = tpack.composite_bfx_effect_dict.get(self.composite_bfx, None)
+        self.composite_afx = tpack.composite_afx_effect_dict.get(self.composite_afx, None)
         
     
     def _init_objects_call_fn(self):
