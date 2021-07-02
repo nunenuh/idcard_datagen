@@ -11,6 +11,8 @@ from collections import OrderedDict
 
 from datagen.imgen.ops import boxes_ops
 from datagen.imgen import transforms
+from datagen.imgen.transforms import augment
+
 from datagen.imgen.content import utils as content_utils
 from datagen.config import data_config
 from datagen.imgen.io import fop
@@ -118,10 +120,8 @@ def clean_augment_param(angle, shear, scale_ratio, num_generated):
 def combine_single(bgfile, idfile, jsfile, base_path: Path,
                    bg_size, scale_ratio, angle, shear, 
                    force_resize: bool = False,
-                   use_basic_effect: bool = True,
-                   basic_effect_mode: str = "simple",
-                   use_adv_effect: bool = True,
-                   adv_effect_mode: str = "simple"):
+                   foreground_fx: str = "simple", background_fx: str = "simple",
+                   composite_bfx: str = "simple", composite_afx: str = "simple",):
     
     id_img = cv.imread(str(idfile), cv.IMREAD_UNCHANGED)
     bg_img = cv.imread(str(bgfile), cv.IMREAD_COLOR)
@@ -155,10 +155,8 @@ def combine_single(bgfile, idfile, jsfile, base_path: Path,
     #Augment Generator
     ratio = random.choice(scale_ratio)
     augment = transforms.AugmentGenerator(scale_ratio=ratio, angle=angle, shear_factor=shear,
-                                          use_basic_effect=use_basic_effect, 
-                                          basic_effect_mode=basic_effect_mode,
-                                          use_adv_effect=use_adv_effect,
-                                          adv_effect_mode=adv_effect_mode)
+                                          foreground_fx=foreground_fx, background_fx=background_fx,
+                                          composite_bfx=composite_bfx, composite_afx=composite_afx)
     
     seg_img, cmp_img, mwboxes, cboxes = augment(bg_img, id_img, mwboxes, cboxes)
     seg_img = (seg_img * 255).astype(np.uint8)
