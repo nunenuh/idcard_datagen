@@ -206,6 +206,7 @@ def combine_single(bgfile, idfile, jsfile, base_path: Path,
         'scale_ratio': ratio,
         'angle': augment.actual_angle,
         'shear_factor': augment.actual_shear,
+        'info_fx': augment.info_fx,
         'box': main_boxes,
         'objects': objects,
     }

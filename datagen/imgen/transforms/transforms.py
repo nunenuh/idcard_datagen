@@ -27,10 +27,12 @@ class ComposeRandomChoice(Compose):
         self.transforms_fn = random.sample(self.transforms, k=self.k)
     
     def __call__(self, img):
+        self.info = []
         self.transforms_fn = random.sample(self.transforms, k=self.k)
         if self.debug: print(self.transforms_fn)
         for t in self.transforms_fn:
             img = t(img)
+            self.info = self.info + t.info
         return img
     
     def __repr__(self):
@@ -43,8 +45,10 @@ class ComposeMulti(object):
         self.transforms = transforms
 
     def __call__(self, img, boxes):
+        self.info = []
         for t in self.transforms:
             img, boxes = t(img, boxes)
+            self.info = self.info + t.info
         return img, boxes
     
 class ComposeMultiRandomChoice(ComposeMulti):
@@ -54,12 +58,12 @@ class ComposeMultiRandomChoice(ComposeMulti):
     
     def __call__(self, img, boxes):
         self.transforms = random.sample(self.transforms, k=self.k)
-        
+        self.info = []
         for t in self.transforms:
             img, boxes = t(img, boxes)
+            self.info = self.info + t.info
         return img, boxes
     
-
 
 class RandomNoise(object):
     def __init__(self, amount_range=(0.07, 0.26), mode_choice=('pepper','s&p'),
@@ -68,11 +72,17 @@ class RandomNoise(object):
         self.mode_choice = mode_choice
         self.randomize = randomize
         self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,    
+        }
     
     def __call__(self, image):
         self.mode = random.choice(self.mode_choice)
         self.amount = random.uniform(*self.amount_range)
-        
+        self.info['mode'] = self.mode
+        self.info['amount'] = self.amount
+                
         if self.randomize and F.coin_toss(p=self.rand_prob):
             if image.shape[-1]==4:
                 b,g,r,a = cv.split(image)
@@ -86,8 +96,11 @@ class RandomNoise(object):
             else:
                 noisy = random_noise(image, mode=self.mode, amount=self.amount)
                 noisy = (noisy * 255).astype(np.uint8)
+                
+            self.info['used'] = True
         else:
             noisy = image
+            
             
         return noisy
     
@@ -105,18 +118,29 @@ class RandomXenoxPhotocopy(object):
         self.rand_prob = p 
         self.noise_p = noise_p
         self.thresh_p = thresh_p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
+        
         
     def __call__(self, image):
         self.noise = random.uniform(*self.noise_range)
-        tmin, tmax = self.thresh_range  
+        tmin, tmax = self.thresh_range
         
         use_thresh = F.coin_toss(p=self.thresh_p)
         use_noise = F.coin_toss(p=self.thresh_p)
         probability = F.coin_toss(p=self.rand_prob)
         
+        self.info['noise'] = self.noise
+        self.info['thresh_range'] = self.thresh_range
+        self.info['noise_in_use'] = use_noise
+        self.info['thresh_in_use'] = use_thresh
+        
         if self.randomize and probability:
             image = F.xenox_filter(image, use_threshold=use_thresh, tmin=tmin, tmax=tmax, 
                                    use_noise=use_noise, noise_amount=self.noise)
+            self.info['used'] = True
 
         return image
 
@@ -124,6 +148,12 @@ class Darken(object):
     def __init__(self, level=-10, gamma=0.5):
         self.level = level
         self.gamma = gamma
+        self.info = {
+            'classname': self.__class__.__name__,
+            'level': self.level,
+            'gamma': self.gamma,
+            'used': True
+        }
         
     def __call__(self, image):
         img_lo_ct = F.adjust_contrast(image, self.level)
@@ -141,6 +171,12 @@ class Lighten(object):
     def __init__(self, level=13, gamma=1.1):
         self.level = level
         self.gamma = gamma
+        self.info = {
+            'classname': self.__class__.__name__,
+            'level': self.level,
+            'gamma': self.gamma,
+            'used': True
+        }
     
     def __call__(self, image):
         img_hi_ct = F.adjust_contrast(image, self.level)
@@ -158,6 +194,11 @@ class Lighten(object):
 class ToLoRes(object):
     def __init__(self, factor=0.5):
         self.factor = factor
+        self.info = {
+            'classname': self.__class__.__name__,
+            'factor': self.factor,
+            'used': True
+        }
     
     def __call__(self, image):
         image = F.to_lo_res(image, factor=self.factor)
@@ -174,11 +215,18 @@ class RandomLoRes(object):
         self.factor_range = factor_range
         self.randomize = randomize
         self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
         
     def __call__(self, image):
         self.factor = random.uniform(*self.factor_range)
+        self.info['factor'] = self.factor
+        
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = F.to_lo_res(image, factor=self.factor)
+            self.info['used'] = True
         return image
 
     def __repr__(self):
@@ -193,12 +241,20 @@ class RandomGamma(object):
         self.gamma_range = gamma_range
         self.randomize = randomize
         self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
+        
     
     def __call__(self, image):
         self.gamma = random.uniform(*self.gamma_range)
+        self.info['gamma'] = self.gamma
+        
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = F.adjust_gamma(image, self.gamma)
-
+            self.info['used'] = True
+            
         return image
         
     def __repr__(self):
@@ -213,12 +269,20 @@ class RandomContrast(object):
         self.level_range = level_range
         self.randomize = randomize
         self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
+        
     
     def __call__(self, image):
         self.level = int(random.uniform(*self.level_range))
+        self.info['level'] = self.level
+        
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = F.adjust_contrast(image, self.level)
-
+            self.info['used'] = True
+            
         return image
     
     def __repr__(self):
@@ -234,12 +298,20 @@ class RandomBrightness(object):
         self.level_range = level_range
         self.randomize = randomize
         self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False
+        }
+        
     
     def __call__(self, image):
         self.level = int(random.uniform(*self.level_range))
+        self.info['level'] = self.level
+        
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = F.adjust_brightness(image, self.level)
-
+            self.info['used'] = True
+            
         return image
         
     def __repr__(self):
@@ -254,11 +326,19 @@ class RandomHueShifting(object):
         self.shift_range = shift_range
         self.randomize = randomize
         self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
+        
     
     def __call__(self, image):
         self.shift = int(random.uniform(*self.shift_range))
+        self.info['shift'] = self.shift
+        
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = F.hue_shifting(image, self.shift)
+            self.info['used'] = True
         
         return image
     
@@ -272,10 +352,15 @@ class RandomChannelShuffle(object):
     def __init__(self, randomize=True, p=0.5):
         self.randomize = randomize
         self.rand_prob = p
-    
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
+        
     def __call__(self, image):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = F.channel_shuffle(image)
+            self.info['used'] = True
 
         return image
         
@@ -283,16 +368,20 @@ class RandomChannelShuffle(object):
         info = f'{self.__class__.__name__}'
         info = info + f'(p={self.rand_prob})'
         return info         
-    
-    
+
 class RandomSharpen(object):
     def __init__(self, randomize=True, p=0.5):
         self.randomize = randomize
         self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
     
     def __call__(self, image):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = F.sharpen(image)
+            self.info['used'] = True
 
         return image
     
@@ -306,10 +395,15 @@ class RandomEmboss(object):
     def __init__(self, randomize=True, p=0.5):
         self.randomize = randomize
         self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
     
     def __call__(self, image):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = F.emboss(image)
+            self.info['used'] = True
 
         return image
         
@@ -318,7 +412,6 @@ class RandomEmboss(object):
         info = info + f'(p={self.rand_prob})'
         return info  
     
-    
 class RandomGaussionBlur(object):
     def __init__(self, sigma_range=(1.0, 5.0), ksize=(5,5),
                  randomize=True, p=0.5):
@@ -326,12 +419,21 @@ class RandomGaussionBlur(object):
         self.ksize = ksize
         self.randomize = randomize
         self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+            'ksize': self.ksize,
+        }
+        
         
     def __call__(self, image):
         self.sigma = int(random.uniform(*self.sigma_range))
+        self.info['sigma'] = self.sigma
+        
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = F.gaussian_blur(image, sigma=self.sigma, ksize=self.ksize)
-
+            self.info['used'] = True
+            
         return image
     
     def __repr__(self):
@@ -344,10 +446,17 @@ class RandomMedianBlur(object):
         self.ksize = ksize
         self.randomize = randomize
         self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+            'ksize': self.ksize
+        }
         
     def __call__(self, image):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = F.median_blur(image, ksize=self.ksize)
+            self.info['used'] = True
+            
         return image
         
     def __repr__(self):
@@ -362,12 +471,22 @@ class RandomMorphDilation(object):
         self.iterations = iterations
         self.randomize = randomize
         self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+            'iterations': self.iterations,
+        }
+        
         
     def __call__(self, image):
         self.shift = int(random.uniform(*self.shift_range))
+        self.info['shift'] = self.shift
+        
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = F.dilation_morphology(image, shift=self.shift,
                                           iterations=self.iterations)
+            self.info['used'] = True
+            
         return image
     
     def __repr__(self):
@@ -380,11 +499,19 @@ class RandomMorphOpening(object):
         self.shift_range = shift_range
         self.randomize = randomize
         self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
         
     def __call__(self, image):
         self.shift = int(random.uniform(*self.shift_range))
+        self.info['shift'] = self.shift
+        
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = F.opening_morphology(image, shift=self.shift)
+            self.info['used'] = True
+            
         return image
     
     def __repr__(self):
@@ -397,11 +524,19 @@ class RandomMorphClosing(object):
         self.shift_range = shift_range
         self.randomize = randomize
         self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
         
     def __call__(self, image):
         self.shift = int(random.uniform(*self.shift_range))
+        self.info['shift'] = self.shift
+        
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = F.closing_morphology(image, shift=self.shift)
+            self.info['used'] = True
+            
         return image     
         
     def __repr__(self):
@@ -413,13 +548,18 @@ class RandomMorphClosing(object):
 class RandomErase(object):
     def __init__(self, area_range=(0.3, 1.0), randomize=True, p=0.5):
         self.area_range = area_range
-
         self.rand_prob = p
         self.randomize = randomize
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
         
     def __call__(self, image):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = F.random_erasing(image, area_range=self.area_range)
+            self.info['used'] = True
+            
         return image
     
     
@@ -432,10 +572,20 @@ class RandomShadow(object):
         self.rand_prob = p
         self.randomize = randomize
         
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+            'area_range': self.area_range,
+            'gamma': self.gamma,
+            'level': self.level 
+        }
+        
     def __call__(self, image):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = F.random_shadow(image, area_range=self.area_range, 
                                     level=self.level, gamma=self.gamma)
+            self.info['used'] = True
+            
         return image
         
 
@@ -443,10 +593,15 @@ class RandomAddSunFlares(object):
     def __init__(self, randomize=True, p=0.5):
         self.randomize = randomize
         self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
         
     def __call__(self, image):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = E.add_sun_flare(image)
+            self.info['used'] = True
         return image 
     
     def __repr__(self):
@@ -457,10 +612,15 @@ class RandomAddShadow(object):
     def __init__(self, randomize=True, p=0.5):
         self.randomize = randomize
         self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
         
     def __call__(self, image):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = E.add_shadow(image)
+            self.info['used'] = True
         return image
 
     def __repr__(self):
@@ -471,10 +631,15 @@ class RandomAddFog(object):
     def __init__(self, randomize=True, p=0.5):
         self.randomize = randomize
         self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
         
     def __call__(self, image):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = E.add_fog(image)
+            self.info['used'] = True
         return image
 
     def __repr__(self):
@@ -485,10 +650,15 @@ class RandomAddSnow(object):
     def __init__(self, randomize=True, p=0.5):
         self.randomize = randomize
         self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
         
     def __call__(self, image):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = E.add_snow(image)
+            self.info['used'] = True
         return image
         
     def __repr__(self):
@@ -499,10 +669,15 @@ class RandomAddRain(object):
     def __init__(self, randomize=True, p=0.5):
         self.randomize = randomize
         self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
         
     def __call__(self, image):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = E.add_rain(image)
+            self.info['used'] = True
         return image
         
     def __repr__(self):
@@ -513,11 +688,16 @@ class RandomAddSpeed(object):
     def __init__(self, randomize=True, p=0.5):
         self.randomize = randomize
         self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
         
     def __call__(self, image):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             try:
                 image = E.add_speed(image)
+                self.info['used'] = True
             except:
                 pass
         return image  
@@ -530,10 +710,15 @@ class RandomAddGravel(object):
     def __init__(self, randomize=True, p=0.5):
         self.randomize = randomize
         self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
         
     def __call__(self, image):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = E.add_gravel(image)
+            self.info['used'] = True
         return image   
         
     def __repr__(self):
@@ -544,11 +729,18 @@ class RandomAddAutumn(object):
     def __init__(self, randomize=True, p=0.5):
         self.randomize = randomize
         self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
         
     def __call__(self, image):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = E.add_autumn(image)
-        return image  
+            self.info['used'] = True
+            
+        return image
+    
         
     def __repr__(self):
         info = f'{self.__class__.__name__}(p={self.rand_prob})'
@@ -559,6 +751,11 @@ class ResizeImageBoxes(object):
     def __init__(self, size: Tuple[int, int], interpolation=cv.INTER_LINEAR):
         self.size = size
         self.interpolation = interpolation
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+            'size': self.size
+        }
 
     def __call__(self, image, boxes):
         rimage, rboxes = F.resize_image_boxes(
@@ -567,6 +764,7 @@ class ResizeImageBoxes(object):
             self.size, 
             self.interpolation
         )
+        self.info['used'] = True
         return rimage, rboxes
         
         
@@ -590,6 +788,11 @@ class RandomRotation(object):
                 assert len(self.angle) == 2, "Invalid range"
             else:
                 self.angle = (-self.angle, self.angle)
+                
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
 
     def __call__(self, image: np.ndarray, mwboxes: np.ndarray, cboxes:List[np.ndarray] ) -> Tuple[Any, Any]:
         if self.randomize:
@@ -599,6 +802,9 @@ class RandomRotation(object):
                 angle = 0
         else:
             angle = self.angle
+            
+        self.info['used'] = True
+        self.info['angle'] = angle
 
         w, h = image.shape[1], image.shape[0]
         cx, cy = w // 2, h // 2
@@ -637,6 +843,11 @@ class RandomShear(object):
                 assert len(self.shear_factor) == 2, "Invalid range for scaling factor"
             else:
                 self.shear_factor = (-self.shear_factor, self.shear_factor)
+                
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
 
     def __call__(self, image, mwboxes, cboxes):
         if self.randomize:
@@ -646,6 +857,9 @@ class RandomShear(object):
                 shear_factor = 0.0
         else:
             shear_factor = self.shear_factor
+            
+        self.info['used'] = True
+        self.info['shear_factor'] = shear_factor
             
         image, mwboxes, cboxes = F.shear_image_boxes(image, mwboxes, cboxes, shear_factor)
 
@@ -661,6 +875,11 @@ class RandomRotateAndShear(object):
         self.rand_prob = rand_prob
         
         self._init_objects_call_fn()
+        
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+        }
         
     def _init_objects_call_fn(self):
         self.rotate_fn = RandomRotation(self.angle, 
@@ -678,6 +897,11 @@ class RandomRotateAndShear(object):
 
         self.rotation_angle = angle
         self.shear_factor = factor
+        
+        self.info['used'] = True
+        self.info['shear_factor'] = factor
+        self.info['angle'] = angle
+        
 
         return simage, smwboxes, scboxes
 

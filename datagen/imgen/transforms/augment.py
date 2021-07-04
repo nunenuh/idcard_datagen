@@ -30,12 +30,18 @@ class AugmentGenerator(object):
         self._init_objects_call_fn()
         self._init_effect_fn()
         
-    
     def _init_effect_fn(self):
         self.foreground_fx = tpack.foreground_effect_dict.get(self.foreground_fx, None)
         self.background_fx = tpack.background_effect_dict.get(self.background_fx, None)
         self.composite_bfx = tpack.composite_bfx_effect_dict.get(self.composite_bfx, None)
         self.composite_afx = tpack.composite_afx_effect_dict.get(self.composite_afx, None)
+        
+        self.info_fx = {
+            "foreground_fx": [],
+            "background_fx": [],
+            "composite_bfx": [],
+            "composite_afx": [],
+        }
         
     
     def _init_objects_call_fn(self):
@@ -102,9 +108,12 @@ class AugmentGenerator(object):
         #safe place to use effect, becaause its after segmetntation
         if self.background_fx:
             backgrd_image = self.background_fx(backgrd_image)
+            self.info_fx['background_fx'] = self.background_fx.info
             
         if self.foreground_fx:
             foregrd_image = self.foreground_fx(foregrd_image)
+            self.info_fx['foreground_fx'] = self.foreground_fx.info
+            
         
         if foregrd_image.shape[-1] != 4:
             foregrd_image = cv.cvtColor(foregrd_image, cv.COLOR_BGR2BGRA)
@@ -114,9 +123,13 @@ class AugmentGenerator(object):
         
         if self.composite_bfx:
             composite_image = self.composite_bfx(composite_image)
+            self.info_fx['composite_bfx'] = self.composite_bfx.info
+            
         
         if self.composite_afx:
             composite_image = self.composite_afx(composite_image)
+            self.info_fx['composite_afx'] = self.composite_afx.info
+            
         
         
         mwboxes, cboxes = self._reorder_boxes(mwboxes, cboxes, xybox)
