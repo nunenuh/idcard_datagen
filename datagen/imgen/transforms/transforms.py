@@ -32,7 +32,7 @@ class ComposeRandomChoice(Compose):
         if self.debug: print(self.transforms_fn)
         for t in self.transforms_fn:
             img = t(img)
-            self.info = self.info + t.info
+            self.info = self.info + [t.info]
         return img
     
     def __repr__(self):
@@ -48,7 +48,7 @@ class ComposeMulti(object):
         self.info = []
         for t in self.transforms:
             img, boxes = t(img, boxes)
-            self.info = self.info + t.info
+            self.info = self.info + [t.info]
         return img, boxes
     
 class ComposeMultiRandomChoice(ComposeMulti):
@@ -61,7 +61,7 @@ class ComposeMultiRandomChoice(ComposeMulti):
         self.info = []
         for t in self.transforms:
             img, boxes = t(img, boxes)
-            self.info = self.info + t.info
+            self.info = self.info + [t.info]
         return img, boxes
     
 
