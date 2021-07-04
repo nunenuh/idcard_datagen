@@ -37,7 +37,6 @@ class AugmentGenerator(object):
         self.composite_afx = tpack.composite_afx_effect_dict.get(self.composite_afx, None)
         
         self.info_fx = {
-            "base_fx":[],
             "foreground_fx": [],
             "background_fx": [],
             "composite_bfx": [],
@@ -97,7 +96,7 @@ class AugmentGenerator(object):
         foregrd_image, mwboxes, cboxes = self.random_rotate_shear_fn(foregrd_image, mwboxes, cboxes)
         self.actual_angle = self.random_rotate_shear_fn.rotation_angle
         self.actual_shear = self.random_rotate_shear_fn.shear_factor
-        self.info_fx['foreground_fx'] = self.info_fx['foreground_fx'] + [self.random_rotate_shear_fn.info]
+        self.info_fx['foreground_fx'].append(self.random_rotate_shear_fn.info)
 
         backgrd_size, foregrd_size = backgrd_image.shape[:2], foregrd_image.shape[:2]
         
@@ -114,7 +113,7 @@ class AugmentGenerator(object):
             
         if self.foreground_fx:
             foregrd_image = self.foreground_fx(foregrd_image)
-            self.info_fx['foreground_fx'] = self.info_fx['foreground_fx']  + self.foreground_fx.info
+            self.info_fx['foreground_fx'].extend(self.foreground_fx.info)
             
         
         if foregrd_image.shape[-1] != 4:
