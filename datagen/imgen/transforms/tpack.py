@@ -30,22 +30,22 @@ morph_effect_fn = ComposeRandomChoice([
 foreground_simple_effect_fn = ComposeRandomChoice([
     darklight_effect_fn,
     color_effect_fn,
-    RandomXenoxPhotocopy(p=0.5, noise_p=0.3, thresh_p=0.5),
+    RandomXenox(p=0.5, noise_p=0.3, thresh_p=0.5),
     RandomLoRes(factor_range=(0.3, 0.5), p=0.5),
     RandomSharpen(p=0.5),
     RandomNoise(amount_range=(0.05, 0.06), p=0.5),
-    RandomGaussionBlur(sigma_range=(1.0, 5.0), p=0.5),
+    RandomGaussianBlur(sigma_range=(1.0, 5.0), p=0.5),
 ], k=1, debug=False)
 
 foreground_medium_effect_fn = ComposeRandomChoice([
     light_effect_fn,
     darklight_effect_fn,
     color_effect_fn,
-    RandomXenoxPhotocopy(p=1, noise_p=0.3, thresh_p=0.8),
+    RandomXenox(p=1, noise_p=0.3, thresh_p=0.8),
     RandomLoRes(factor_range=(0.3, 0.5), p=1),
     RandomSharpen(p=1),
     RandomNoise(amount_range=(0.05, 0.06)),
-    RandomGaussionBlur(sigma_range=(1.0, 5.0), p=1),
+    RandomGaussianBlur(sigma_range=(1.0, 5.0), p=1),
     morph_effect_fn,
 ], k=3, debug=False)
 
@@ -53,11 +53,11 @@ foreground_complex_effect_fn = ComposeRandomChoice([
     light_effect_fn,
     darklight_effect_fn,
     color_effect_fn,
-    RandomXenoxPhotocopy(p=1, noise_p=0.5, thresh_p=0.8),
+    RandomXenox(p=1, noise_p=0.5, thresh_p=0.8),
     RandomLoRes(factor_range=(0.3, 0.5), p=1),
     RandomSharpen(p=1),
     RandomNoise(amount_range=(0.05, 0.06), p=1),
-    RandomGaussionBlur(sigma_range=(1.0, 5.0), p=1),
+    RandomGaussianBlur(sigma_range=(1.0, 5.0), p=1),
     morph_effect_fn,
 ], k=5, debug=False)
 
@@ -79,7 +79,7 @@ background_simple_effect_fn = ComposeRandomChoice([
     RandomLoRes(factor_range=(0.3, 0.5), p=0.5),
     RandomSharpen(p=0.5),
     RandomNoise(amount_range=(0.05, 0.06), p=0.5),
-    RandomGaussionBlur(sigma_range=(1.0, 5.0), p=0.5),
+    RandomGaussianBlur(sigma_range=(1.0, 5.0), p=0.5),
 ], k=1, debug=False)
 
 background_medium_effect_fn = ComposeRandomChoice([
@@ -89,7 +89,7 @@ background_medium_effect_fn = ComposeRandomChoice([
     RandomLoRes(factor_range=(0.3, 0.5), p=1),
     RandomSharpen(p=1),
     RandomNoise(amount_range=(0.05, 0.06)),
-    RandomGaussionBlur(sigma_range=(1.0, 5.0), p=1),
+    RandomGaussianBlur(sigma_range=(1.0, 5.0), p=1),
     morph_effect_fn,
 ], k=3, debug=False)
 
@@ -100,7 +100,7 @@ background_complex_effect_fn = ComposeRandomChoice([
     RandomLoRes(factor_range=(0.3, 0.5), p=1),
     RandomSharpen(p=1),
     RandomNoise(amount_range=(0.05, 0.06), p=1),
-    RandomGaussionBlur(sigma_range=(1.0, 5.0), p=1),
+    RandomGaussianBlur(sigma_range=(1.0, 5.0), p=1),
     morph_effect_fn,
 ], k=5, debug=False)
 
@@ -121,7 +121,7 @@ composite_bfx_simple_effect_fn = ComposeRandomChoice([
     RandomLoRes(factor_range=(0.3, 0.5), p=0.5),
     RandomSharpen(p=0.5),
     RandomNoise(amount_range=(0.05, 0.06), p=0.5),
-    RandomGaussionBlur(sigma_range=(1.0, 5.0), p=0.5),
+    RandomGaussianBlur(sigma_range=(1.0, 5.0), p=0.5),
 ], k=1, debug=False)
 
 composite_bfx_medium_effect_fn = ComposeRandomChoice([
@@ -131,7 +131,7 @@ composite_bfx_medium_effect_fn = ComposeRandomChoice([
     RandomLoRes(factor_range=(0.3, 0.5), p=1),
     RandomSharpen(p=1),
     RandomNoise(amount_range=(0.05, 0.06)),
-    RandomGaussionBlur(sigma_range=(1.0, 5.0), p=1),
+    RandomGaussianBlur(sigma_range=(1.0, 5.0), p=1),
     morph_effect_fn,
 ], k=3, debug=False)
 
@@ -142,7 +142,7 @@ composite_bfx_complex_effect_fn = ComposeRandomChoice([
     RandomLoRes(factor_range=(0.3, 0.5), p=1),
     RandomSharpen(p=1),
     RandomNoise(amount_range=(0.05, 0.06), p=1),
-    RandomGaussionBlur(sigma_range=(1.0, 5.0), p=1),
+    RandomGaussianBlur(sigma_range=(1.0, 5.0), p=1),
     morph_effect_fn,
 ], k=5, debug=False)
 

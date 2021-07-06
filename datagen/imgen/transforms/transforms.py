@@ -109,7 +109,7 @@ class RandomNoise(object):
         info = info+ f'(amount_range={self.amount_range}, mode={self.mode_choice})'
         return info  
     
-class RandomXenoxPhotocopy(object):
+class RandomXenox(object):
     def __init__(self, noise_range=(0.05, 0.15), thresh_range=(60,255),
                  randomize=True, p=0.5, noise_p=0.2, thresh_p = 0.2):
         self.noise_range = noise_range
@@ -133,9 +133,9 @@ class RandomXenoxPhotocopy(object):
         probability = F.coin_toss(p=self.rand_prob)
         
         self.info['noise'] = self.noise
-        self.info['thresh_range'] = self.thresh_range
-        self.info['noise_in_use'] = use_noise
-        self.info['thresh_in_use'] = use_thresh
+        self.info['thresh'] = self.thresh_range
+        self.info['noise_used'] = use_noise
+        self.info['thresh_used'] = use_thresh
         
         if self.randomize and probability:
             image = F.xenox_filter(image, use_threshold=use_thresh, tmin=tmin, tmax=tmax, 
@@ -412,7 +412,7 @@ class RandomEmboss(object):
         info = info + f'(p={self.rand_prob})'
         return info  
     
-class RandomGaussionBlur(object):
+class RandomGaussianBlur(object):
     def __init__(self, sigma_range=(1.0, 5.0), ksize=(5,5),
                  randomize=True, p=0.5):
         self.sigma_range = sigma_range
@@ -553,15 +553,15 @@ class RandomErase(object):
         self.info = {
             'classname': self.__class__.__name__,
             'used': False,
+            'area': self.area_range
         }
         
     def __call__(self, image):
         if self.randomize and F.coin_toss(p=self.rand_prob):
             image = F.random_erasing(image, area_range=self.area_range)
-            self.info['used'] = True
+            self.info['used'] = True            
             
         return image
-    
     
 class RandomShadow(object):
     def __init__(self, area_range=(0.3, 1.0), level=-10, gamma=0.5, 
@@ -575,7 +575,7 @@ class RandomShadow(object):
         self.info = {
             'classname': self.__class__.__name__,
             'used': False,
-            'area_range': self.area_range,
+            'area': self.area_range,
             'gamma': self.gamma,
             'level': self.level 
         }
