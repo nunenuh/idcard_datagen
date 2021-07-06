@@ -859,7 +859,7 @@ class RandomShear(object):
             shear_factor = self.shear_factor
             
         self.info['used'] = True
-        self.info['shear_factor'] = shear_factor
+        self.info['factor'] = shear_factor
             
         image, mwboxes, cboxes = F.shear_image_boxes(image, mwboxes, cboxes, shear_factor)
 

@@ -51,6 +51,18 @@ class AugmentGenerator(object):
             rand_prob=self.rand_prob
         )
         
+        self.random_rotate_fn = RandomRotation(
+            angle=self.angle,
+            randomize=self.randomize, 
+            rand_prob=self.rand_prob
+        )
+        
+        self.random_shear_fn = RandomShear(
+            shear_factor=self.shear_factor, 
+            randomize=self.randomize, 
+            rand_prob=self.rand_prob
+        )
+        
     def _create_segment_image(self, frgd_base_image, backgrd_size, xybox):
         frgd_segment_image = cv.split(frgd_base_image)[-1]
         frgd_segment_image = (frgd_segment_image > 0).astype(np.uint8)
@@ -93,11 +105,13 @@ class AugmentGenerator(object):
         backgrd_image = background_image.copy()
         foregrd_image = foreground_image.copy()
         
-        foregrd_image, mwboxes, cboxes = self.random_rotate_shear_fn(foregrd_image, mwboxes, cboxes)
-        self.actual_angle = self.random_rotate_shear_fn.rotation_angle
-        self.actual_shear = self.random_rotate_shear_fn.shear_factor
-        self.info_fx['foreground_fx'].append(self.random_rotate_shear_fn.info)
-
+        foregrd_image, mwboxes, cboxes, angle = self.random_rotate_fn(foregrd_image, mwboxes, cboxes)
+        foregrd_image, mwboxes, cboxes, shear = self.random_shear_fn(foregrd_image, mwboxes, cboxes)
+        self.info_fx['foreground_fx'].append(self.random_rotate_fn.info)
+        self.info_fx['foreground_fx'].append(self.random_shear_fn.info)
+        self.actual_angle = angle
+        self.actual_shear = shear
+        
         backgrd_size, foregrd_size = backgrd_image.shape[:2], foregrd_image.shape[:2]
         
         nfgd_size, xybox = self._nforegrd_size_with_xybox(backgrd_size, foregrd_size)
