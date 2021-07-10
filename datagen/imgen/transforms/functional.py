@@ -7,6 +7,8 @@ from PIL import Image
 from skimage import data, exposure, filters
 from skimage.util import noise, random_noise
 
+from .func_line import *
+
 
 def coin_toss(p=0.5):
     pf = 1-p

@@ -32,7 +32,10 @@ class ComposeRandomChoice(Compose):
         if self.debug: print(self.transforms_fn)
         for t in self.transforms_fn:
             img = t(img)
-            self.info = self.info + [t.info]
+            if type(t.info) == list:
+                self.info.extend(t.info)
+            else:
+                self.info.append(t.info)
         return img
     
     def __repr__(self):
@@ -48,7 +51,10 @@ class ComposeMulti(object):
         self.info = []
         for t in self.transforms:
             img, boxes = t(img, boxes)
-            self.info = self.info + [t.info]
+            if type(t.info) == list:
+                self.info.extend(t.info)
+            else:
+                self.info.append(t.info)
         return img, boxes
     
 class ComposeMultiRandomChoice(ComposeMulti):
@@ -61,7 +67,10 @@ class ComposeMultiRandomChoice(ComposeMulti):
         self.info = []
         for t in self.transforms:
             img, boxes = t(img, boxes)
-            self.info = self.info + [t.info]
+            if type(t.info) == list:
+                self.info.extend(t.info)
+            else:
+                self.info.append(t.info)
         return img, boxes
     
 
@@ -108,6 +117,51 @@ class RandomNoise(object):
         info = f'{self.__class__.__name__}'
         info = info+ f'(amount_range={self.amount_range}, mode={self.mode_choice})'
         return info  
+    
+    
+class RandomDrawLines(object):
+    def __init__(self, num_lines=10, line_size_factor=0.01,
+                 line_thickness=1, line_curve_factor=0.5,
+                 line_max_point=3, line_min_point=2,
+                 randomize_color=False, color_mode='single',
+                 randomize=True, p=0.5):
+        self.num_lines = num_lines
+        self.line_size_factor = line_size_factor
+        self.line_thickness=line_thickness
+        self.line_curve_factor=line_curve_factor
+        self.line_min_point = line_min_point
+        self.line_max_point = line_max_point
+        self.randomize_color=randomize_color
+        self.color_mode = color_mode
+        self.randomize = randomize
+        self.rand_prob = p
+        self.info = {
+            'classname': self.__class__.__name__,
+            'used': False,
+            'num': num_lines,
+        }
+    
+    def __call__(self, image):
+        h,w = image.shape[:2]
+        mx = max(h,w)
+        line_size = int(self.line_size_factor * mx)
+        self.info['size'] = line_size
+        
+        probability = F.coin_toss(p=self.rand_prob)
+        if self.randomize and probability:
+            image = F.draw_random_lines(image, line_size=line_size, 
+                                        line_thickness=self.line_thickness,
+                                        curve_factor=self.line_curve_factor,
+                                        min_point=self.line_min_point, 
+                                        max_point=self.line_max_point,
+                                        randomize_color=self.randomize_color,
+                                        color_mode=self.color_mode)
+            self.info['used'] = True
+            
+            
+        return image
+        
+    
     
 class RandomXenox(object):
     def __init__(self, noise_range=(0.05, 0.15), thresh_range=(60,255),
