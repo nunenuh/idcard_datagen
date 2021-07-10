@@ -102,7 +102,7 @@ def convert2curve(point, start=50, stop=100, num=50):
     # Initilaize y axis
     lspace = np.linspace(start=start, stop=stop, num=num)
     
-    #calculate the coefficients.
+    #calculate the coefficients.    
     z = np.polyfit(x, y, 2)
     #calculate x axis
     line_fitx = (z[0]*lspace**2) + (z[1]*lspace) + z[2]
@@ -138,7 +138,7 @@ def draw_random_lines(image, num_line,
     points = random_multi_line(num_line, size=line_size, 
                                angle=angle, curve_factor=curve_factor,
                                min_point=min_point, max_point=max_point)
-    points = np.array(points)
+    # points = np.array(points)
     
     image_lines = draw_lines(image, points, 
                              thickness=line_thickness,
