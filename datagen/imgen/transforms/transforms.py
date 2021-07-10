@@ -154,8 +154,8 @@ class RandomDrawLines(object):
                                         curve_factor=self.line_curve_factor,
                                         min_point=self.line_min_point, 
                                         max_point=self.line_max_point,
-                                        randomize_color=self.randomize_color,
-                                        color_mode=self.color_mode)
+                                        randomize_line_color=self.randomize_color,
+                                        line_color_mode=self.color_mode)
             self.info['used'] = True
             
             
