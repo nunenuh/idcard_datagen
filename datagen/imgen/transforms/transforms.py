@@ -149,7 +149,7 @@ class RandomDrawLines(object):
         
         probability = F.coin_toss(p=self.rand_prob)
         if self.randomize and probability:
-            image = F.draw_random_lines(image, line_size=line_size, 
+            image = F.draw_random_lines(image, num_line=self.num_lines, line_size=line_size, 
                                         line_thickness=self.line_thickness,
                                         curve_factor=self.line_curve_factor,
                                         min_point=self.line_min_point, 
