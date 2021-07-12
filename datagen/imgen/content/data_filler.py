@@ -85,7 +85,7 @@ def fill_data(image, data_value, file_path: str = 'data/idcard/base3.json', pad_
                         vpos = value.get('position')
                         if last_added_line != 0:
                             vpos[1] = vpos[1] + last_added_line
-                        for jtxt in joined_text:
+                        for idx, jtxt in enumerate(joined_text):
                             image, data = draw.text(image, jtxt,
                                                     classname=k, subclass="value", 
                                                     pos=vpos, pad_factor=pad_factor,
@@ -93,7 +93,8 @@ def fill_data(image, data_value, file_path: str = 'data/idcard/base3.json', pad_
                                                     x_min=value.get("x_min", 0),
                                                     x_max=value.get("x_max", 0),
                                                     adjust=adjust, font_name=font_name,
-                                                    font_size=font_size)
+                                                    font_size=font_size,
+                                                    line=idx)
                             
                             vpos[1] = vpos[1] + line_height
                             datas = datas + data

@@ -24,7 +24,8 @@ def text(
     font_size: int = 25,
     font_name: str = "arial",
     img_mode: str = "RGBA",
-    color: tuple = (0, 0, 0)
+    color: tuple = (0, 0, 0),
+    line: int = 0
 ):
     if adjust == "normal":
         img, data = text_normal(image, text, 
@@ -37,7 +38,8 @@ def text(
                                 font_name=font_name, 
                                 font_size=font_size,
                                 img_mode=img_mode, 
-                                color=color)
+                                color=color,
+                                line=line)
     elif adjust == "center":
         img, data = text_center(image, text, 
                                 classname=classname, 
@@ -52,7 +54,8 @@ def text(
                                 font_name=font_name, 
                                 font_size=font_size,
                                 img_mode=img_mode, 
-                                color=color)
+                                color=color,
+                                line=line)
     else:
         raise ValueError(f"Only 'normal' and 'center' "
                          f"are accepted as value of adjust parameter!")
@@ -72,7 +75,8 @@ def text_normal(
     font_name: str = "arial", 
     font_size: int =14,
     img_mode: str = "RGBA", 
-    color: tuple = (0, 0, 0)
+    color: tuple = (0, 0, 0),
+    line: int = 0
 ):
     np_img = image.copy()
 
@@ -114,7 +118,7 @@ def text_normal(
         odt = OrderedDict({"text": txt, "points": points.tolist(),
                            'chardata': char_data,
                            "classname": classname, 'subclass': subclass,
-                           "sequence": idx})
+                           "sequence": idx, "line": line})
         data.append(odt)
 
         draw.text(xymin, txt, font=font, fill=color)
@@ -139,7 +143,8 @@ def text_center(
     font_name: str = "arial", 
     font_size: int = 14, 
     img_mode: str = "RGBA", 
-    color: tuple = (0, 0, 0)
+    color: tuple = (0, 0, 0),
+    line: int = 0
 ):
     np_img = image.copy()
     img, draw = imtext_ops.get_image_draw(np_img, img_mode=img_mode)
@@ -198,7 +203,7 @@ def text_center(
         odt = OrderedDict({"text": txt, "points": points.tolist(),
                            'chardata': char_data,
                            "classname": classname, 'subclass': subclass,
-                           "sequence": idx})
+                           "sequence": idx, "line": line})
         data.append(odt)
 
         draw.text(xymin, txt, font=font, fill=color)
