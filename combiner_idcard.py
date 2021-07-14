@@ -41,7 +41,7 @@ parser.add_argument('--composite_bfx', default=None, type=str, required=False,
 
 parser.add_argument('--composite_afx', default="simple", type=str, required=False,
                     help='fill composite image with advance simple, medium, or complex')
-
+    
 parser.add_argument('--balance_white_background', default=True, type=bool,
                     help='balance background with white background, this is useful especially in scanner data',
                     required=False)

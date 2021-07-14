@@ -68,14 +68,14 @@ def reformat_json_data(data_dict: dict):
         
             
 
-    cnames, scnames, texts, labels, sequence, genseq, char_data = create_class_number(data_dict)
+    cnames, scnames, texts, labels, line, sequence, genseq, char_data = create_class_number(data_dict)
 
-    return np.array(boxes), cnames, scnames, texts, labels, sequence, genseq, cboxes, clist
+    return np.array(boxes), cnames, scnames, texts, labels, line, sequence, genseq, cboxes, clist
 
 
 def create_class_number(data_dict: dict):
     objects = data_dict.get('objects').copy()
-    csname, scname, sequence, text, label, genseq = [], [], [], [], [], []
+    csname, scname, sequence, text, label, line, genseq = [], [], [], [], [], [], []
     char_data = []
     
     for obj in objects:
@@ -84,6 +84,7 @@ def create_class_number(data_dict: dict):
         seq = obj.get('sequence')
         txt = obj.get("text")
         lbl = obj.get('label')
+        ln = obj.get("line")
         gs = obj.get('genseq')
         cdata = obj.get('chardata')
         
@@ -91,8 +92,10 @@ def create_class_number(data_dict: dict):
         scname.append(data_config.subclassname[scn])
         sequence.append(seq)
         label.append(lbl)
+        line.append(ln)
         text.append(txt)
         genseq.append(gs)
         char_data.append(cdata)
+        
 
-    return csname, scname, text, label, sequence, genseq, char_data
+    return csname, scname, text, label, line, sequence, genseq, char_data
